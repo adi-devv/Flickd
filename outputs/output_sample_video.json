@@ -1,0 +1,1005 @@
+{
+  "video_id": "sample_video",
+  "vibes": [
+    "Coquette",
+    "Clean Girl"
+  ],
+  "products": [
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_100_dress_0.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_100_dress_1.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_110_dress_2.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_120_dress_3.jpg"
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_120_shoe_4.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_130_dress_5.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_140_dress_6.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_150_dress_7.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_160_dress_8.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_170_dress_9.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_180_dress_10.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_180_shirt_11.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_190_dress_12.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_200_dress_13.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_210_skirt_14.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_210_dress_15.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_230_bag_16.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_240_skirt_17.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_250_bag_18.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_260_dress_19.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_270_bag_20.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_280_dress_21.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_290_dress_22.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_290_bag_23.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_300_bag_24.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_300_dress_25.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_310_dress_26.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_310_bag_27.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_320_shirt_28.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_320_bag_29.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_330_dress_30.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_330_shirt_31.jpg"
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_330_shoe_32.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_340_dress_33.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_350_dress_34.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_350_skirt_35.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_360_dress_36.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_360_skirt_37.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_370_dress_38.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_380_shirt_39.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_390_shirt_40.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_400_dress_41.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_410_dress_42.jpg"
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_410_shoe_43.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_420_dress_44.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_430_dress_45.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_430_skirt_46.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_440_dress_47.jpg"
+    },
+    {
+      "type": "jacket",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_450_jacket_48.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_450_bag_49.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_460_bag_50.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_460_dress_51.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_480_skirt_52.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_480_dress_53.jpg"
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_490_shoe_54.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_490_shirt_55.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_490_skirt_56.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_500_skirt_57.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_500_shirt_58.jpg"
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_500_shoe_59.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_510_skirt_60.jpg"
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_510_shoe_61.jpg"
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_510_bag_62.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_520_skirt_63.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_540_shirt_64.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_540_skirt_65.jpg"
+    },
+    {
+      "type": "pants",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_540_pants_66.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_550_shirt_67.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_550_skirt_68.jpg"
+    },
+    {
+      "type": "pants",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_550_pants_69.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_560_skirt_70.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_560_shirt_71.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_570_shirt_72.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_570_skirt_73.jpg"
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_580_shirt_74.jpg"
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_580_skirt_75.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_60_dress_76.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_60_dress_77.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_70_dress_78.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_70_dress_79.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_80_dress_80.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_90_dress_81.jpg"
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Unknown",
+        "Unknown",
+        "Unknown"
+      ],
+      "match_type": "no_match",
+      "matched_product_id": null,
+      "confidence": 0.0,
+      "crop_image_file": "cropped_frames/crop_frame_90_dress_82.jpg"
+    }
+  ]
+}

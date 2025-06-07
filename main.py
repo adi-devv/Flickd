@@ -116,8 +116,7 @@ def detect_objects(image_path, frame_number, model, detectedframepath):
     except Exception as e:
         logger.error(f"Error running YOLO on {image_path}: {e}")
         return []
-
-def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="data/cache", max_product_ids=2000):
+def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="data/cache", max_product_ids=1000):
     """Set up FAISS index for product matching with CLIP embeddings, processing one image per product ID."""
     logger.info(f"Setting up FAISS index with {images_csv} and {product_data_csv}")
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -211,21 +210,39 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
             valid_image_found = False
             
             # Try processing one valid image
+            product_dominant_colors_rgb = [] # Initialize this for the current product
             for _, row in group.iterrows():
                 if valid_image_found:
                     break
                 try:
                     response = requests.get(row['image_url'], timeout=10)
                     response.raise_for_status()
-                    image = Image.open(BytesIO(response.content))
-                    image = preprocess(image).unsqueeze(0).to(device)
+                    
+                    # Convert response content to a PIL Image first for ColorThief
+                    pil_image_for_color = Image.open(BytesIO(response.content))
+                    
+                    # Convert PIL Image to OpenCV format (numpy array) for get_dominant_color
+                    # ColorThief actually needs PIL Image, but get_dominant_color expects OpenCV crop (numpy array)
+                    # Let's ensure consistency. If get_dominant_color expects OpenCV, convert to that.
+                    # Current get_dominant_color takes 'crop' which is an OpenCV numpy array.
+                    # So, we need to convert pil_image_for_color to OpenCV format.
+                    opencv_image_for_color = cv2.cvtColor(np.array(pil_image_for_color), cv2.COLOR_RGB2BGR)
+
+                    # Extract dominant colors for this product
+                    product_dominant_colors_rgb = get_dominant_color(opencv_image_for_color, num_colors=5)
+                    logger.debug(f"Product {product_id}: Extracted dominant RGBs: {product_dominant_colors_rgb}")
+
+
+                    # Now, process for CLIP embedding (requires PIL image, then preprocess)
+                    image_for_clip = preprocess(pil_image_for_color).unsqueeze(0).to(device)
                     with torch.no_grad():
-                        embedding = clip_model.encode_image(image).cpu().numpy()
+                        embedding = clip_model.encode_image(image_for_clip).cpu().numpy()
                         embedding = embedding / np.linalg.norm(embedding, axis=1, keepdims=True)
+                    
                     embeddings.append(embedding)
                     product_indices.append(current_index)
                     index_to_product_id[current_index] = str(product_id)
-                    if current_index == 2196:
+                    if current_index == 2196: # This specific log might not be relevant unless for debugging
                         logger.info(f"FAISS index 2196 assigned to product ID {product_id}, image {row['image_url']}")
                     logger.debug(f"Index {current_index} mapped to product_id {product_id}, image {row['image_url']}")
                     current_index += 1
@@ -235,11 +252,13 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
                     continue
             
             if valid_image_found:
+                # Add the dominant_colors_rgb to the product_info dictionary
                 product_info.append({
                     "id": str(product_id),
                     "product_type": product_data.get('product_type', 'unknown'),
                     "description": product_data.get('description', ''),
-                    "product_tags": product_data.get('product_tags', '')
+                    "product_tags": product_data.get('product_tags', ''),
+                    "dominant_colors_rgb": product_dominant_colors_rgb # <--- ADDED THIS LINE
                 })
                 product_id_to_indices[str(product_id)] = product_indices
                 successful_product_ids += 1
@@ -247,12 +266,20 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
             else:
                 logger.warning(f"No valid images found for product ID {product_id}")
                 invalid_product_ids.append(product_id)
+                # Ensure product_info still gets an entry, even if colors are empty
+                product_info.append({
+                    "id": str(product_id),
+                    "product_type": product_data.get('product_type', 'unknown'),
+                    "description": product_data.get('description', ''),
+                    "product_tags": product_data.get('product_tags', ''),
+                    "dominant_colors_rgb": [] # <--- ADDED THIS FOR EMPTY CASE
+                })
         
         # Log if all product IDs are processed
         if successful_product_ids < max_product_ids:
             logger.info(f"Processed all {successful_product_ids} available product IDs. No more product IDs to process, continuing.")
         
-        # Remove invalid product IDs from CSVs
+        # Remove invalid product IDs from CSVs (optional, but good for data cleanliness)
         if invalid_product_ids:
             logger.info(f"Removing {len(invalid_product_ids)} product IDs with no valid images from CSVs")
             images_df = images_df[~images_df[id_column].isin(invalid_product_ids)]
@@ -413,13 +440,15 @@ for name, rgb in FASHION_COLOR_MAP_RGB.items():
     bgr = np.uint8([[list(rgb)]])
     lab = cv2.cvtColor(bgr, cv2.COLOR_RGB2LAB)[0][0]
     FASHION_COLOR_MAP_LAB[name] = lab
-
-def get_dominant_color(crop, center_region_percentage=0.5):
-    """Extract top 3 dominant colors from a crop, prioritizing the center region."""
+def get_dominant_color(crop, num_colors=5, quality=10, center_region_percentage=0.5):
+    """
+    Extracts dominant RGB colors from a crop, prioritizing the center region.
+    Returns a list of RGB tuples.
+    """
     try:
         if crop is None or crop.size == 0:
             logger.warning("Input crop is empty or None.")
-            return ["Unknown", "Unknown", "Unknown"]
+            return [(0,0,0)] * num_colors # Return black or a default color
 
         h, w, _ = crop.shape
         center_h = int(h * center_region_percentage)
@@ -431,56 +460,123 @@ def get_dominant_color(crop, center_region_percentage=0.5):
         center_crop = crop[start_y:end_y, start_x:end_x]
 
         if center_crop.size == 0 or center_crop.shape[0] < 10 or center_crop.shape[1] < 10:
-            logger.warning("Center crop is too small or invalid. Falling back to full crop.")
+            logger.warning("Center crop is too small or invalid. Falling back to full crop for color detection.")
             target_crop = crop
         else:
             target_crop = center_crop
-        
+
         target_crop_rgb = cv2.cvtColor(target_crop, cv2.COLOR_BGR2RGB)
         pil_image = Image.fromarray(target_crop_rgb)
+        
         temp_buffer = io.BytesIO()
         pil_image.save(temp_buffer, format="PNG")
         temp_buffer.seek(0)
 
         color_thief = ColorThief(temp_buffer)
-        palette = color_thief.get_palette(color_count=5, quality=10)
-        logger.debug(f"ColorThief Palette RGB: {palette}")
+        palette_rgb = color_thief.get_palette(color_count=num_colors, quality=quality)
+        logger.debug(f"ColorThief Palette RGB: {palette_rgb}")
 
-        target_crop_hsv = cv2.cvtColor(target_crop_rgb, cv2.COLOR_RGB2HSV)
-        avg_s = np.mean(target_crop_hsv[:, :, 1])
-        avg_v = np.mean(target_crop_hsv[:, :, 2])
+        # If ColorThief can't find enough colors, pad with black or most dominant
+        while len(palette_rgb) < num_colors:
+            palette_rgb.append(palette_rgb[0] if palette_rgb else (0,0,0))
 
-        if avg_s < 30:
-            if avg_v > 220:
-                return ["White", "White", "White"]
-            elif avg_v < 30:
-                return ["Black", "Black", "Black"]
-            else:
-                return ["Gray", "Gray", "Gray"]
+        return palette_rgb
 
-        color_names = []
-        for rgb in palette:
-            rgb_array = np.uint8([[list(rgb)]])
-            lab = cv2.cvtColor(rgb_array, cv2.COLOR_RGB2LAB)[0][0]
-            min_dist = float("inf")
-            color_name = "Unknown"
-            for map_name, map_lab in FASHION_COLOR_MAP_LAB.items():
-                dist = np.linalg.norm(lab - map_lab)
+    except Exception as e:
+        logger.error(f"Error detecting dominant RGB colors: {e}", exc_info=True)
+        return [(0,0,0)] * num_colors # Return black or a default color on error
+
+# --- Helper Function to Convert RGB to Color Names (for display/logging only) ---
+def rgb_to_color_names(rgb_list, color_map_lab, max_colors=3):
+    """
+    Converts a list of RGB tuples to a list of approximate color names using LAB distance.
+    Prioritizes distinct names and limits the output to max_colors.
+    """
+    named_colors = []
+    seen_names = set()
+
+    for rgb in rgb_list:
+        rgb_array = np.uint8([[list(rgb)]])
+        lab = cv2.cvtColor(rgb_array, cv2.COLOR_RGB2LAB)[0][0] # Convert to LAB
+
+        min_dist = float("inf")
+        color_name = "Unknown"
+
+        # Check for achromatic colors first (White, Black, Gray) using LAB values
+        L, A, B = lab
+        if L > 90 and abs(A) < 5 and abs(B) < 5: # High L, low A/B for white
+            name_candidate = "White"
+        elif L < 10 and abs(A) < 5 and abs(B) < 5: # Low L, low A/B for black
+            name_candidate = "Black"
+        elif abs(A) < 5 and abs(B) < 5: # Mid L, low A/B for gray
+            name_candidate = "Gray"
+        else:
+            name_candidate = None
+
+        if name_candidate and name_candidate not in seen_names:
+            color_name = name_candidate
+        else:
+            # Fallback to map lookup for chromatic colors or if achromatic already seen
+            for map_name, map_lab in color_map_lab.items():
+                if map_name in ["White", "Black", "Gray"] and (L > 90 or L < 10 or (abs(A) < 5 and abs(B) < 5)):
+                    continue 
+
+                dist = np.linalg.norm(lab - np.array(map_lab)) # Calculate Euclidean distance in LAB
                 if dist < min_dist:
                     min_dist = dist
                     color_name = map_name
-            color_names.append(color_name)
-            logger.debug(f"Matched Color: {color_name}, RGB: {rgb}, LAB Distance: {min_dist}")
+        
+        if color_name not in seen_names and len(named_colors) < max_colors:
+            named_colors.append(color_name)
+            seen_names.add(color_name)
+        elif color_name in seen_names and len(named_colors) < max_colors:
+            pass # Keep adding same color if palette has it and we haven't hit max distinct names
+            
+    while len(named_colors) < max_colors:
+        named_colors.append(named_colors[0] if named_colors else "Unknown")
 
-        while len(color_names) < 3:
-            color_names.append(color_names[0] if color_names else "Unknown")
+    return named_colors[:max_colors]
 
-        return color_names[:3]
+# --- NEW Helper Function for LAB Color Comparison ---
+def compare_colors_by_lab(rgb_list1, rgb_list2, max_lab_distance=100.0):
+    """
+    Compares two lists of dominant RGB colors by converting them to LAB and
+    calculating an average minimum distance similarity.
+    Returns a score from 0.0 (no similarity) to 1.0 (perfect similarity).
+    """
+    if not rgb_list1 or not rgb_list2:
+        return 0.0
 
-    except Exception as e:
-        logger.error(f"Error detecting colors: {e}")
-        return ["Unknown", "Unknown", "Unknown"]
+    lab_list1 = [cv2.cvtColor(np.uint8([[list(rgb)]]), cv2.COLOR_RGB2LAB)[0][0] for rgb in rgb_list1]
+    lab_list2 = [cv2.cvtColor(np.uint8([[list(rgb)]]), cv2.COLOR_RGB2LAB)[0][0] for rgb in rgb_list2]
 
+    # Calculate average minimum distance from list1 to list2
+    min_distances_sum = 0
+    count = 0
+    for lab1 in lab_list1:
+        min_dist_for_lab1 = float('inf')
+        for lab2 in lab_list2:
+            dist = np.linalg.norm(lab1 - lab2) # Euclidean distance in LAB
+            if dist < min_dist_for_lab1:
+                min_dist_for_lab1 = dist
+        min_distances_sum += min_dist_for_lab1
+        count += 1
+    
+    if count == 0:
+        return 0.0
+        
+    avg_min_distance = min_distances_sum / count
+
+    # Convert distance to similarity (0 to 1)
+    # A max_lab_distance of ~100-150 is typical for significant differences.
+    # The maximum possible delta E 2000 is ~100, but for Euclidean in Lab it can be higher (e.g., ~200-250 for black to white).
+    # We cap it at 100 for normalization to make similarity scale more meaningfully.
+    similarity = 1.0 - (avg_min_distance / max_lab_distance)
+    similarity = max(0.0, similarity) # Ensure similarity is not negative
+    
+    return similarity
+
+# --- Main Matching Function ---
 def match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device):
     """Match detected objects to catalog products using CLIP and FAISS."""
     logger.info("Matching products to detections")
@@ -493,6 +589,17 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
     logger.debug(f"FAISS index size: {index.ntotal} embeddings")
     
     matches = []
+    # Convert product_info to a dictionary for faster lookup by product_id
+    product_info_dict = {p['id']: p for p in product_info}
+
+    # Define weights for visual and color similarity
+    WEIGHT_CLIP = 0.75
+    WEIGHT_COLOR = 0.25
+
+    # Thresholds for combined similarity
+    TOTAL_SIMILARITY_EXACT_THRESHOLD = 0.80
+    TOTAL_SIMILARITY_SIMILAR_THRESHOLD = 0.40
+
     for i, detection in enumerate(detections):
         try:
             logger.debug(f"Processing detection {i}: class={detection['class']}, frame={detection['frame_number']}")
@@ -500,55 +607,102 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
             crop_path = f"cropped_frames/crop_frame_{detection['frame_number']}_{detection['class']}_{i}.jpg"
             cv2.imwrite(crop_path, crop)
             crop_image = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+
+            # --- Visual (CLIP) Embedding & Search ---
             image_input = preprocess(crop_image).unsqueeze(0).to(device)
             with torch.no_grad():
                 query_embedding = clip_model.encode_image(image_input).cpu().numpy()
                 query_embedding = query_embedding / np.linalg.norm(query_embedding, axis=1, keepdims=True)
-            distances, indices = index.search(query_embedding, k=1)
-            similarity = cosine_similarity(query_embedding, index.reconstruct(indices[0][0]).reshape(1, -1))[0][0]
-            logger.debug(f"Detection {i} similarity score: {similarity}, matched index: {indices[0][0]}")
-            match_type = "exact" if similarity > 0.7 else "similar" if similarity >= 0.6 else "no_match"
-            
-            matched_index = indices[0][0]
+
+            distances, indices = index.search(query_embedding, k=1) 
+
+            clip_similarity = 0.0
+            matched_index = -1
+            if indices[0][0] != -1:
+                matched_index = indices[0][0]
+                # Assuming your FAISS index (like IndexFlatIP) returns cosine similarity directly
+                clip_similarity = distances[0][0]
+            else:
+                logger.debug(f"Detection {i}: No valid visual match found by FAISS (index -1).")
+
+            # --- Color Extraction for Detection (RGBs) and Naming (for display) ---
+            detection_colors_rgb = get_dominant_color(crop) # Get RGB tuples
+            detection_colors_names = rgb_to_color_names(detection_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3)
+            logger.debug(f"Detection {i} dominant color names: {detection_colors_names}")
+
             matched_product_id = None
-            for product_id, idx_list in product_id_to_indices.items():
-                if matched_index in idx_list:
-                    matched_product_id = product_id
-                    break
-            
-            if matched_product_id is None:
-                logger.warning(f"No product ID found for matched index {matched_index}")
-            
-            product = next((p for p in product_info if p['id'] == matched_product_id), None)
-            top_colors = get_dominant_color(crop)
+            product_colors_rgb = []
+            product_colors_names = [] 
+
+            if matched_index != -1:
+                for product_id, idx_list in product_id_to_indices.items():
+                    if matched_index in idx_list:
+                        matched_product_id = product_id
+                        break
+
+            if matched_product_id is None and matched_index != -1:
+                logger.warning(f"No product ID found for matched index {matched_index}. This might indicate a discrepancy.")
+
+            product = product_info_dict.get(matched_product_id)
+
+            if product:
+                # --- Assume product_info now contains 'dominant_colors_rgb' ---
+                product_colors_rgb = product.get('dominant_colors_rgb', [])
+                if not product_colors_rgb:
+                    logger.warning(f"Product ID {matched_product_id} missing 'dominant_colors_rgb' in product_info.")
+                product_colors_names = rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3)
+                logger.debug(f"Matched product {matched_product_id} dominant color names: {product_colors_names}")
+
+            # --- Combine Similarities: Color Similarity using LAB values ---
+            color_similarity = compare_colors_by_lab(detection_colors_rgb, product_colors_rgb) if product else 0.0
+
+            total_similarity = (WEIGHT_CLIP * clip_similarity) + (WEIGHT_COLOR * color_similarity)
+            total_similarity = min(total_similarity, 1.0) # Cap at 1.0
+
+
+            logger.debug(f"Detection {i}: CLIP Sim={clip_similarity:.4f}, Color Sim (LAB)={color_similarity:.4f}, Total Sim={total_similarity:.4f}")
+
+            # --- Determine Match Type based on Combined Similarity ---
+            match_type = "exact" if total_similarity > TOTAL_SIMILARITY_EXACT_THRESHOLD else \
+                         "similar" if total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD else \
+                         "no_match"
+
             if product and match_type != "no_match":
                 matches.append({
                     "type": detection['class'],
-                    "colors": top_colors,
+                    "colors": detection_colors_names, # Reverted to 'colors' key for schema
                     "match_type": match_type,
                     "matched_product_id": str(matched_product_id),
-                    "confidence": float(similarity),
+                    "confidence": float(total_similarity),
+                    "clip_confidence": float(clip_similarity), 
+                    "color_confidence": float(color_similarity), 
                     "crop_image_file": crop_path
                 })
-                logger.debug(f"Match found: product_id={matched_product_id}, match_type={match_type}, confidence={similarity}")
+                logger.debug(f"Match found: product_id={matched_product_id}, match_type={match_type}, total_confidence={total_similarity:.4f}")
             else:
                 matches.append({
                     "type": detection['class'],
-                    "colors": top_colors,
+                    "colors": detection_colors_names, # Reverted to 'colors' key for schema
                     "match_type": "no_match",
                     "matched_product_id": None,
-                    "confidence": float(similarity),
+                    "confidence": float(total_similarity),
+                    "clip_confidence": float(clip_similarity),
+                    "color_confidence": float(color_similarity),
                     "crop_image_file": crop_path
                 })
-                logger.debug(f"No match for detection {i}: match_type=no_match, confidence={similarity}")
+                logger.debug(f"No match for detection {i}: match_type=no_match, total_confidence={total_similarity:.4f}")
+
         except Exception as e:
-            logger.error(f"Error matching product for detection {i}: {e}")
+            logger.error(f"Error matching product for detection {i}: {e}", exc_info=True)
             matches.append({
                 "type": detection['class'],
-                "colors": ["Unknown", "Unknown", "Unknown"],
-                "match_type": "no_match",
+                "colors": ["Unknown", "Unknown", "Unknown"], # Ensure 3 strings for schema
+                "match_type": "error", # Use 'error' if schema allows, else 'no_match'
                 "matched_product_id": None,
-                "confidence": 0.0
+                "confidence": 0.0,
+                "clip_confidence": 0.0,
+                "color_confidence": 0.0,
+                "crop_image_file": crop_path
             })
     logger.debug(f"Final matches: {matches}")
     return matches
@@ -671,11 +825,11 @@ def main(video_path, images_csv, product_data_csv, caption, video_id, output_jso
 
 if __name__ == "__main__":
     # Define paths and inputs
-    video_path = "data/sample_video.mp4"
+    video_path = "data/sample_video2.mp4"
     images_csv = "data/images.csv"
     product_data_csv = "data/product_data.csv"
     caption = '''darling How would you style this Where comfort meets chic.'''
-    video_id = "sample_video"
+    video_id = "sample_video2"
     output_json_path = f"outputs/output_{video_id}.json"
     vibe_taxonomy = ["Coquette", "Clean Girl", "Cottagecore", "Streetcore", "Y2K", "Boho", "Party Glam"]
     
