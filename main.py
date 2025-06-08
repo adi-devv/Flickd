@@ -1,6 +1,7 @@
 import cv2
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
+import shutil
 from ultralytics import YOLO
 import json
 import clip
@@ -72,13 +73,14 @@ def detect_objects(image_path, frame_number, model, detectedframepath):
         return []
     try:
         frame = cv2.imread(image_path)
-        results = model.predict(source=image_path, conf=0.4, save=False, line_width=2)
+        results = model.predict(source=image_path, conf=0.5, save=False, line_width=2)
         detections = []
         for result in results:
             for box in result.boxes:
                 class_name = result.names[int(box.cls)]
                 bbox = box.xywh[0].tolist()
                 confidence = float(box.conf)
+                
                 center_x, center_y, w, h = [int(v) for v in bbox]
                 
                 x = max(0, center_x - w // 2)
@@ -117,7 +119,7 @@ def detect_objects(image_path, frame_number, model, detectedframepath):
         logger.error(f"Error running YOLO on {image_path}: {e}")
         return []
     
-def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="data/cache", max_product_ids=10):
+def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="data/cache", max_product_ids=1000):
     """Set up FAISS index for product matching with CLIP embeddings, cropping images with YOLO to extract colors from fashion items and saving crops in cache."""
     logger.info(f"Setting up FAISS index with {images_csv} and {product_data_csv}")
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -296,7 +298,7 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
                     "product_tags": product_data.get('product_tags', ''),
                     "dominant_colors_rgb": []
                 })
-        
+            
         # Log if all product IDs are processed
         if successful_product_ids < max_product_ids:
             logger.info(f"Processed all {successful_product_ids} available product IDs")
@@ -553,47 +555,66 @@ def rgb_to_color_names(rgb_list, color_map_lab, max_colors=3):
     return named_colors[:max_colors]
 
 # --- NEW Helper Function for LAB Color Comparison ---
-def compare_colors_by_lab(rgb_list1, rgb_list2, max_lab_distance=100.0):
+def compare_colors_by_lab(rgb_list1, rgb_list2, max_lab_distance=200.0):
     """
-    Compares two lists of dominant RGB colors by converting them to LAB and
-    calculating an average minimum distance similarity.
-    Returns a score from 0.0 (no similarity) to 1.0 (perfect similarity).
+    Compares two lists of dominant RGB colors by converting them to LAB and calculating a bidirectional
+    average minimum distance similarity. Returns a score from 0.0 (no similarity) to 1.0 (perfect similarity).
+    
+    Args:
+        rgb_list1 (list): List of RGB tuples for the first image (e.g., [(255, 0, 0), ...]).
+        rgb_list2 (list): List of RGB tuples for the second image.
+        max_lab_distance (float): Maximum LAB distance for normalization (default 200.0).
+    
+    Returns:
+        float: Similarity score between 0.0 and 1.0.
     """
     if not rgb_list1 or not rgb_list2:
+        logger.warning("One or both RGB lists are empty. Returning similarity 0.0.")
         return 0.0
 
-    lab_list1 = [cv2.cvtColor(np.uint8([[list(rgb)]]), cv2.COLOR_RGB2LAB)[0][0] for rgb in rgb_list1]
-    lab_list2 = [cv2.cvtColor(np.uint8([[list(rgb)]]), cv2.COLOR_RGB2LAB)[0][0] for rgb in rgb_list2]
+    try:
+        # Convert RGB lists to LAB
+        lab_list1 = [cv2.cvtColor(np.uint8([[list(rgb)]]), cv2.COLOR_RGB2LAB)[0][0] for rgb in rgb_list1]
+        lab_list2 = [cv2.cvtColor(np.uint8([[list(rgb)]]), cv2.COLOR_RGB2LAB)[0][0] for rgb in rgb_list2]
+        logger.debug(f"LAB colors 1: {lab_list1}")
+        logger.debug(f"LAB colors 2: {lab_list2}")
 
-    # Calculate average minimum distance from list1 to list2
-    min_distances_sum = 0
-    count = 0
-    for lab1 in lab_list1:
-        min_dist_for_lab1 = float('inf')
-        for lab2 in lab_list2:
-            dist = np.linalg.norm(lab1 - lab2) # Euclidean distance in LAB
-            if dist < min_dist_for_lab1:
-                min_dist_for_lab1 = dist
-        min_distances_sum += min_dist_for_lab1
-        count += 1
-    
-    if count == 0:
-        return 0.0
+        # Calculate minimum distances from lab_list1 to lab_list2
+        min_distances_1to2 = []
+        for lab1 in lab_list1:
+            min_dist = min(np.linalg.norm(lab1 - lab2) for lab2 in lab_list2)
+            min_distances_1to2.append(min_dist)
         
-    avg_min_distance = min_distances_sum / count
+        # Calculate minimum distances from lab_list2 to lab_list1
+        min_distances_2to1 = []
+        for lab2 in lab_list2:
+            min_dist = min(np.linalg.norm(lab2 - lab1) for lab1 in lab_list1)
+            min_distances_2to1.append(min_dist)
 
-    # Convert distance to similarity (0 to 1)
-    # A max_lab_distance of ~100-150 is typical for significant differences.
-    # The maximum possible delta E 2000 is ~100, but for Euclidean in Lab it can be higher (e.g., ~200-250 for black to white).
-    # We cap it at 100 for normalization to make similarity scale more meaningfully.
-    similarity = 1.0 - (avg_min_distance / max_lab_distance)
-    similarity = max(0.0, similarity) # Ensure similarity is not negative
+        # Combine distances
+        all_distances = min_distances_1to2 + min_distances_2to1
+        if not all_distances:
+            logger.warning("No valid LAB distances computed. Returning similarity 0.0.")
+            return 0.0
+        
+        avg_min_distance = sum(all_distances) / len(all_distances)
+        logger.debug(f"LAB distances: {all_distances}, Average: {avg_min_distance:.2f}")
+
+        # Non-linear normalization using exponential decay
+        # Similarity drops quickly for larger distances, reflecting perceptual differences
+        similarity = np.exp(-avg_min_distance / (max_lab_distance / 2.0))
+        similarity = max(0.0, min(1.0, similarity))  # Clamp to [0, 1]
+        logger.debug(f"Color similarity: {similarity:.4f} (avg distance: {avg_min_distance:.2f}, max_lab_distance: {max_lab_distance})")
+
+        return similarity
+
+    except Exception as e:
+        logger.error(f"Error in compare_colors_by_lab: {e}", exc_info=True)
+        return 0.0
     
-    return similarity
-
 # --- Main Matching Function ---
 def match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device):
-    """Match detected objects to catalog products, targeting confidence >= 0.9 for exact and >= 0.75 for similar, excluding no_match."""
+    """Match detected objects to catalog products, targeting confidence >= 0.9 for exact and >= 0.75 for similar, excluding no_match. Color matching disabled."""
     logger.info("Matching products to detections")
     if not detections:
         logger.warning("No detections provided to match_products")
@@ -608,26 +629,27 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
 
     # Define thresholds and parameters
     MIN_CLIP_SIMILARITY = 0.25  # Low to allow more candidates
-    MIN_COLOR_SIMILARITY = 0.15  # Low to allow more candidates
+    MIN_COLOR_SIMILARITY = 0.7  # Low to allow more candidates
     TOTAL_SIMILARITY_EXACT_THRESHOLD = 0.90  # Target for exact matches
-    TOTAL_SIMILARITY_SIMILAR_THRESHOLD = 0.6  # Target for similar matches
+    TOTAL_SIMILARITY_SIMILAR_THRESHOLD = 0.75  # Target for similar matches
     TOP_K = 20  # Consider more candidates
 
     for i, detection in enumerate(detections):
         try:
             logger.debug(f"Processing detection {i}: class={detection['class']}, frame={detection['frame_number']}")
             crop = detection['crop']
-            crop_path = f"cropped_frames/crop_frame_{detection['frame_number']}_{detection['class']}_{i}.jpg"
-            cv2.imwrite(crop_path, crop)
+            # crop_path = f"cropped_frames/crop_frame_{detection['frame_number']}_{detection['class']}_{i}.jpg"
+            # cv2.imwrite(crop_path, crop) # Removed saving individual crops for every detection
             crop_image = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
 
-            # Dynamic weights based on object type
+            # # Dynamic weights based on object type
             if detection['class'] in ['dress', 'skirt', 'shirt']:
-                WEIGHT_CLIP = 0.45  # Slightly favor color for clothing
-                WEIGHT_COLOR = 0.55
+                WEIGHT_CLIP = 1   # Slightly favor color for clothing
+                WEIGHT_COLOR = 0.1
             else:  # e.g., bag, shoe
-                WEIGHT_CLIP = 0.55  # Slightly favor CLIP for accessories
-                WEIGHT_COLOR = 0.45
+                WEIGHT_CLIP = 1   # Slightly favor CLIP for accessories
+                WEIGHT_COLOR = 0.05
+            # WEIGHT_CLIP = 1.0
 
             # --- Visual (CLIP) Embedding & Search ---
             image_input = preprocess(crop_image).unsqueeze(0).to(device)
@@ -639,7 +661,7 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
             distances, indices = index.search(query_embedding, k=TOP_K)
             logger.debug(f"Detection {i}: Top {TOP_K} FAISS indices: {indices[0]}, distances: {distances[0]}")
 
-            # --- Color Extraction for Detection ---
+            # # --- Color Extraction for Detection ---
             detection_colors_rgb = get_dominant_color(crop)
             detection_colors_names = rgb_to_color_names(detection_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3)
             logger.debug(f"Detection {i} dominant color names: {detection_colors_names}")
@@ -676,213 +698,198 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
                     logger.warning(f"No product info for product ID {matched_product_id}")
                     continue
 
-                # --- Color Similarity ---
+                # # --- Color Similarity ---
                 product_colors_rgb = product.get('dominant_colors_rgb', [])
                 if not product_colors_rgb:
                     logger.warning(f"Product ID {matched_product_id} missing 'dominant_colors_rgb'")
                     color_similarity = 0.0
                 else:
-                    logger.debug(f"Product ID colors are {rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ["Unknown", "Unknown", "Unknown"]} == {detection_colors_names}")
-                    
+                    logger.debug(f"Product ID colors are {rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ['Unknown', 'Unknown', 'Unknown']} == {detection_colors_names}")
                     color_similarity = compare_colors_by_lab(detection_colors_rgb, product_colors_rgb, max_lab_distance=80.0)
-                
+                # color_similarity = 0.0  # Color similarity disabled
+
                 # Apply minimum thresholds
-                if clip_similarity < MIN_CLIP_SIMILARITY or color_similarity < MIN_COLOR_SIMILARITY:
-                    logger.debug(f"Detection {i}: Index {matched_index} rejected (CLIP={clip_similarity:.4f}, Color={color_similarity:.4f})")
+                if clip_similarity < MIN_CLIP_SIMILARITY:  # Removed color threshold
+                    logger.debug(f"Detection {i}: Index {matched_index} rejected (CLIP={clip_similarity:.4f})")
                     continue
 
-                # Compute total similarity
-                total_similarity = (WEIGHT_CLIP * clip_similarity) + (WEIGHT_COLOR * color_similarity)
+                # Compute total similarity (now just CLIP similarity)
+                total_similarity = WEIGHT_CLIP * clip_similarity  # Color weight is effectively 0
                 total_similarity = min(total_similarity, 1.0)
 
                 logger.debug(f"Detection {i}: Index {matched_index}, Product ID {matched_product_id}, "
-                            f"CLIP Sim={clip_similarity:.4f}, Color Sim={color_similarity:.4f}, Total Sim={total_similarity:.4f}")
+                                f"CLIP Sim={clip_similarity:.4f}, Total Sim={total_similarity:.4f}")
 
                 candidates.append({
+                    "product_id": matched_product_id,
+                    "product_type": product.get('product_type'),
+                    "description": product.get('description'),
+                    "product_tags": product.get('product_tags'),
                     "clip_similarity": clip_similarity,
                     "color_similarity": color_similarity,
                     "total_similarity": total_similarity,
-                    "product_id": matched_product_id,
-                    "match_type": "exact" if total_similarity > TOTAL_SIMILARITY_EXACT_THRESHOLD else \
-                                  "similar" if total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD else "no_match"
+                    "product_dominant_colors_rgb": product_colors_rgb,
+                    "product_dominant_colors_names": rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB)
                 })
-
-            # Re-rank candidates to prioritize high CLIP and color similarity
+            
+            # Re-rank candidates
             if candidates:
-                # Sort by total_similarity, prioritizing balanced CLIP and color similarity
-                candidates = sorted(
-                    candidates,
-                    key=lambda x: (x["total_similarity"], min(x["clip_similarity"], x["color_similarity"])),
-                    reverse=True
-                )
+                candidates.sort(key=lambda x: x['total_similarity'], reverse=True)
                 best_candidate = candidates[0]
-                best_total_similarity = best_candidate["total_similarity"]
-                best_clip_similarity = best_candidate["clip_similarity"]
-                best_color_similarity = best_candidate["color_similarity"]
-                best_product_id = best_candidate["product_id"]
-                best_match_type = best_candidate["match_type"]
+                best_match = best_candidate
+                best_total_similarity = best_candidate['total_similarity']
+                best_clip_similarity = best_candidate['clip_similarity']
+                best_color_similarity = best_candidate['color_similarity']
+                best_product_id = best_candidate['product_id']
 
-                if best_match_type in ["exact", "similar"]:
-                    best_match = {
-                        "type": detection['class'],
-                        "colors": detection_colors_names,
-                        "match_type": best_match_type,
-                        "matched_product_id": str(best_product_id),
-                        "confidence": float(best_total_similarity),
-                        "clip_confidence": float(best_clip_similarity),
-                        "color_confidence": float(best_color_similarity),
-                        "crop_image_file": crop_path,
-                        "matched_product_colors": rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ["Unknown", "Unknown", "Unknown"]                    }
+                if best_total_similarity >= TOTAL_SIMILARITY_EXACT_THRESHOLD:
+                    best_match_type = "exact_match"
+                elif best_total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD:
+                    best_match_type = "similar_match"
+                else:
+                    best_match_type = "no_match" # Falls below similar threshold
 
-            # Append only if a valid match is found
-            if best_match and best_match_type in ["exact", "similar", "no_match"]:
-                matches.append(best_match)
-                logger.debug(f"Match found: product_id={best_product_id}, match_type={best_match_type}, "
-                            f"total_confidence={best_total_similarity:.4f}")
-            else:
-                logger.debug(f"Skipping detection {i}: no_match, total_confidence={best_total_similarity:.4f}, "
-                            f"clip_confidence={best_clip_similarity:.4f}, color_confidence={best_color_similarity:.4f}")
-
-        except Exception as e:
-            logger.error(f"Error matching product for detection {i}: {e}", exc_info=True)
-            matches.append({
-                "type": detection['class'],
-                "colors": ["Unknown", "Unknown", "Unknown"],
-                "match_type": "error",
-                "matched_product_id": None,
-                "confidence": 0.0,
-                "clip_confidence": 0.0,
-                "color_confidence": 0.0,
-                "crop_image_file": crop_path
-            })
-
-    logger.debug(f"Final matches: {matches}")
-    return matches
-
-def classify_vibe(caption, product_info, vibe_taxonomy=None):
-    """Classify video vibe based on caption and product metadata."""
-    logger.info("Classifying vibe")
-    nlp = spacy.load("en_core_web_sm")
-    vibe_keywords = {
-        'Coquette': ['darling', 'flirty', 'romance', 'dress', 'feminine', 'sweet', 'charm', 'lace', 'bow', 'heart', 'blush', 'cute'],
-        'Boho': ['summer', 'flowy', 'earthy', 'outfit', 'date', 'bohemian', 'relaxed', 'fringe', 'natural', 'breezy', 'gypsy', 'vibes'],
-        'Clean Girl': ['minimal', 'neutral', 'sleek', 'simple', 'clean', 'classic', 'chic', 'effortless', 'crisp', 'modern', 'subtle'],
-        'Cottagecore': ['vintage', 'pastel', 'nature', 'rustic', 'floral', 'cozy', 'farmhouse', 'whimsical', 'meadow', 'homemade'],
-        'Streetcore': ['urban', 'sneakers', 'graffiti', 'edgy', 'street', 'cool', 'grunge', 'skate', 'bold', 'raw', 'city'],
-        'Y2K': ['glitter', 'metallic', 'retro', 'bold', 'sparkly', 'neon', 'futuristic', 'pop', 'shiny', 'trendy', '2000s'],
-        'Party Glam': ['sparkle', 'sequin', 'bold', 'glam', 'shimmer', 'luxe', 'dazzle', 'fancy', 'evening', 'glitz', 'radiant']
-    }
-    if vibe_taxonomy:
-        vibe_keywords = {vibe: vibe_keywords.get(vibe, []) for vibe in vibe_taxonomy}
-    
-    text = caption.lower()
-    doc = nlp(text)
-    scores = {vibe: 0 for vibe in vibe_keywords}
-    for token in doc:
-        for vibe, keywords in vibe_keywords.items():
-            if token.text in keywords:
-                scores[vibe] += 1
-    logger.debug(f"Vibe scores: {scores}")
-    top_vibes = [vibe for vibe, score in sorted(scores.items(), key=lambda x: x[1], reverse=True)[:3] if score > 0]
-    return top_vibes or ["Unknown"]
-
-def validate_output(output):
-    """Validate JSON output against schema."""
-    schema = {
-        "type": "object",
-        "properties": {
-            "video_id": {"type": "string"},
-            "vibes": {"type": "array", "items": {"type": "string"}},
-            "products": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "type": {"type": "string"},
-                        "colors": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3},
-                        "match_type": {"type": "string", "enum": ["exact", "similar", "no_match"]},
-                        "matched_product_id": {"type": ["string", "null"]},
-                        "confidence": {"type": "number"}
-                    },
-                    "required": ["type", "colors", "match_type", "matched_product_id", "confidence"]
+            match_result = {
+                "frame_number": detection['frame_number'],
+                "detected_class": detection['class'],
+                "bbox": detection['bbox'],
+                "detection_confidence": detection['confidence'],
+                "detection_dominant_colors_rgb": detection_colors_rgb,
+                "detection_dominant_colors_names": detection_colors_names,
+                "matched_product": {
+                    "product_id": best_product_id,
+                    "match_type": best_match_type,
+                    "clip_similarity": float(f"{best_clip_similarity:.4f}") if best_match else 0.0,
+                    "color_similarity": float(f"{best_color_similarity:.4f}") if best_match else 0.0,
+                    "total_similarity": float(f"{best_total_similarity:.4f}") if best_match else 0.0,
+                    "product_type": best_match['product_type'] if best_match else "N/A",
+                    "description": best_match['description'] if best_match else "N/A",
+                    "product_tags": best_match['product_tags'] if best_match else "N/A",
+                    "dominant_colors_rgb": best_match['product_dominant_colors_rgb'] if best_match else [],
+                    "dominant_colors_names": best_match['product_dominant_colors_names'] if best_match else []
                 }
             }
-        },
-        "required": ["video_id", "vibes", "products"]
-    }
-    try:
-        validate(instance=output, schema=schema)
-        logger.info("Output JSON validated successfully")
-    except Exception as e:
-        logger.error(f"Output JSON validation failed: {e}")
-        raise
+            matches.append(match_result)
+        except Exception as e:
+            logger.error(f"Error processing detection {i}: {e}", exc_info=True)
+            matches.append({
+                "frame_number": detection['frame_number'],
+                "detected_class": detection['class'],
+                "bbox": detection['bbox'],
+                "detection_confidence": detection['confidence'],
+                "error": str(e)
+            })
+    return matches
 
-def main(video_path, images_csv, product_data_csv, caption, video_id, output_json_path, vibe_taxonomy=None):
-    """Main function to process video and generate output JSON."""
-    logger.info(f"Starting processing for video ID: {video_id}")
-    
-    # Load YOLO model
+def validate_json_output(data, schema_path="output_schema.json"):
+    """Validates the output JSON against a predefined schema."""
+    logger.info(f"Validating JSON output against schema: {schema_path}")
     try:
-        model = YOLO("D:/Aadit/ML/Flickd/runs/detect/train3/weights/best.pt")
+        with open(schema_path, 'r') as f:
+            schema = json.load(f)
+        validate(instance=data, schema=schema)
+        logger.info("JSON output validated successfully.")
+        return True
+    except FileNotFoundError:
+        logger.error(f"Schema file not found at {schema_path}")
+        return False
     except Exception as e:
-        logger.error(f"Error loading YOLO model: {e}")
-        return
-    
-    # Setup FAISS index
-    try:
-        index, product_info, product_id_to_indices, clip_model, preprocess, device = setup_faiss_index(images_csv, product_data_csv)
-    except Exception as e:
-        logger.error(f"Failed to setup FAISS index: {e}")
-        return
-    
-    # Process video
-    output_dir = "frames"
-    detectedframepath = "detected_frames"
-    cropped_frames_dir = "cropped_frames"
+        logger.error(f"JSON validation error: {e}")
+        return False
 
-    if extract_frames(video_path, output_dir):
-        detections = []
-        os.makedirs(detectedframepath, exist_ok=True)
-        os.makedirs(cropped_frames_dir, exist_ok=True)
-        for frame_path in os.listdir(output_dir):
-            if frame_path.endswith(".jpg"):
-                frame_number = int(frame_path.split("_")[1].split(".")[0])
-                full_frame_path = os.path.join(output_dir, frame_path)
-                frame_detections = detect_objects(full_frame_path, frame_number, model, detectedframepath)
-                detections.extend(frame_detections)
-        
-        # Match products
-        matches = match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device)
-        
-        # Classify vibe
-        vibes = classify_vibe(caption, product_info, vibe_taxonomy)
-        
-        # Format output
-        output = {
-            "video_id": video_id,
-            "vibes": vibes,
-            "products": matches
-        }
-        
-        # Validate output
-        validate_output(output)
-        
-        # Save output
-        os.makedirs("outputs", exist_ok=True)
-        with open(output_json_path, "w") as f:
-            json.dump(output, f, indent=2)
-        logger.info(f"Saved output to {output_json_path}")
-    else:
-        logger.error("Failed to extract frames. Exiting.")
+# --- Main execution for all videos ---
+def process_all_videos(data_dir="data", output_base_dir="output"):
+    """
+    Processes all videos in data/videos, extracts frames, detects objects,
+    matches products, and saves results in separate video-named folders.
+    """
+    videos_dir = os.path.join(data_dir, "videos")
+    captions_dir = os.path.join(data_dir, "captions")
+    images_csv = os.path.join(data_dir, "images.csv")
+    product_data_csv = os.path.join(data_dir, "product_data.csv")
+
+    if not all(os.path.exists(d) for d in [videos_dir, captions_dir, images_csv, product_data_csv]):
+        logger.error("Required data directories or files are missing. Please check 'data/' structure.")
+        return
+
+    # Setup FAISS index once for all videos
+    try:
+        index, product_info, product_id_to_indices, clip_model, preprocess, device = \
+            setup_faiss_index(images_csv, product_data_csv)
+    except Exception as e:
+        logger.critical(f"Failed to set up FAISS index. Exiting: {e}")
+        return
+
+    yolo_model = YOLO("D:/Aadit/ML/Flickd/runs/detect/train3/weights/best.pt")
+
+    video_files = [f for f in os.listdir(videos_dir) if f.endswith(('.mp4', '.avi', '.mov', '.mkv'))]
+    if not video_files:
+        logger.warning(f"No video files found in {videos_dir}. Exiting.")
+        return
+
+    for video_num, video_filename in enumerate(video_files):
+        video_name = os.path.splitext(video_filename)[0]
+        video_path = os.path.join(videos_dir, video_filename)
+        caption_path = os.path.join(captions_dir, f"{video_name}.json") # Assuming caption file has same name as video
+
+        video_output_dir = os.path.join(output_base_dir, f"video_{video_num + 1}")
+        frames_output_dir = os.path.join(video_output_dir, "frames")
+        detected_frames_output_dir = os.path.join(video_output_dir, "detected_frames")
+        os.makedirs(frames_output_dir, exist_ok=True)
+        os.makedirs(detected_frames_output_dir, exist_ok=True)
+
+        logger.info(f"\n--- Processing Video: {video_filename} (Output to: {video_output_dir}) ---")
+
+        # 1. Extract Frames
+        if not extract_frames(video_path, frames_output_dir):
+            logger.error(f"Skipping {video_filename} due to frame extraction failure.")
+            continue
+
+        # 2. Load Captions (if available)
+        video_captions = {}
+        if os.path.exists(caption_path):
+            try:
+                with open(caption_path, 'r') as f:
+                    video_captions = json.load(f)
+                logger.info(f"Loaded captions for {video_filename}")
+            except Exception as e:
+                logger.error(f"Error loading captions for {video_filename}: {e}")
+        else:
+            logger.warning(f"No caption file found for {video_filename} at {caption_path}")
+
+        all_detections = []
+        frame_files = sorted([f for f in os.listdir(frames_output_dir) if f.endswith('.jpg')],
+                             key=lambda x: int(x.split('_')[1].split('.')[0]))
+
+        # 3. Detect Objects in Frames
+        for frame_file in frame_files:
+            frame_number = int(frame_file.split('_')[1].split('.')[0])
+            frame_path = os.path.join(frames_output_dir, frame_file)
+            detections_in_frame = detect_objects(frame_path, frame_number, yolo_model, detected_frames_output_dir)
+            all_detections.extend(detections_in_frame)
+            logger.info(f"Detected {len(detections_in_frame)} objects in frame {frame_number}")
+
+        # 4. Match Products and Integrate Captions
+        matched_results = match_products(all_detections, index, product_info, product_id_to_indices, clip_model, preprocess, device)
+
+        final_output = []
+        for result in matched_results:
+            frame_number = result['frame_number']
+            # Add caption if available for this frame
+            result['caption'] = video_captions.get(str(frame_number), "No caption available for this frame.")
+            final_output.append(result)
+
+        # 5. Save Output
+        output_json_path = os.path.join(video_output_dir, "output.json")
+        try:
+            with open(output_json_path, 'w') as f:
+                json.dump(final_output, f, indent=4)
+            logger.info(f"Analysis results saved to {output_json_path}")
+            # 6. Validate Output
+            if not validate_json_output(final_output):
+                logger.warning(f"Validation failed for {output_json_path}")
+        except Exception as e:
+            logger.error(f"Failed to save or validate JSON for {video_filename}: {e}")
 
 if __name__ == "__main__":
-    # Define paths and inputs
-    video_path = "data/sample_video2.mp4"
-    images_csv = "data/images.csv"
-    product_data_csv = "data/product_data.csv"
-    caption = '''darling How would you style this Where comfort meets chic.'''
-    video_id = "sample_video2"
-    output_json_path = f"outputs/output_{video_id}.json"
-    vibe_taxonomy = ["Coquette", "Clean Girl", "Cottagecore", "Streetcore", "Y2K", "Boho", "Party Glam"]
-    
-    main(video_path, images_csv, product_data_csv, caption, video_id, output_json_path, vibe_taxonomy)
+    process_all_videos(data_dir="data", output_base_dir="output")
