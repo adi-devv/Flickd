@@ -80,7 +80,6 @@ def detect_objects(image_path, frame_number, model, detectedframepath):
                 class_name = result.names[int(box.cls)]
                 bbox = box.xywh[0].tolist()
                 confidence = float(box.conf)
-                
                 center_x, center_y, w, h = [int(v) for v in bbox]
                 
                 x = max(0, center_x - w // 2)
@@ -298,7 +297,7 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
                     "product_tags": product_data.get('product_tags', ''),
                     "dominant_colors_rgb": []
                 })
-            
+        
         # Log if all product IDs are processed
         if successful_product_ids < max_product_ids:
             logger.info(f"Processed all {successful_product_ids} available product IDs")
@@ -613,7 +612,7 @@ def compare_colors_by_lab(rgb_list1, rgb_list2, max_lab_distance=200.0):
         return 0.0
     
 # --- Main Matching Function ---
-def match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device):
+def match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device, video_id):
     """Match detected objects to catalog products, targeting confidence >= 0.9 for exact and >= 0.75 for similar, excluding no_match. Color matching disabled."""
     logger.info("Matching products to detections")
     if not detections:
@@ -638,16 +637,16 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
         try:
             logger.debug(f"Processing detection {i}: class={detection['class']}, frame={detection['frame_number']}")
             crop = detection['crop']
-            # crop_path = f"cropped_frames/crop_frame_{detection['frame_number']}_{detection['class']}_{i}.jpg"
-            # cv2.imwrite(crop_path, crop) # Removed saving individual crops for every detection
+            crop_path = f"cropped_frames/crop_frame_{detection['frame_number']}_{detection['class']}_{i}.jpg"
+            cv2.imwrite(crop_path, crop)
             crop_image = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
 
             # # Dynamic weights based on object type
             if detection['class'] in ['dress', 'skirt', 'shirt']:
-                WEIGHT_CLIP = 1   # Slightly favor color for clothing
+                WEIGHT_CLIP = 1  # Slightly favor color for clothing
                 WEIGHT_COLOR = 0.1
             else:  # e.g., bag, shoe
-                WEIGHT_CLIP = 1   # Slightly favor CLIP for accessories
+                WEIGHT_CLIP = 1  # Slightly favor CLIP for accessories
                 WEIGHT_COLOR = 0.05
             # WEIGHT_CLIP = 1.0
 
@@ -704,7 +703,7 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
                     logger.warning(f"Product ID {matched_product_id} missing 'dominant_colors_rgb'")
                     color_similarity = 0.0
                 else:
-                    logger.debug(f"Product ID colors are {rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ['Unknown', 'Unknown', 'Unknown']} == {detection_colors_names}")
+                    logger.debug(f"Product ID colors are {rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ["Unknown", "Unknown", "Unknown"]} == {detection_colors_names}")
                     color_similarity = compare_colors_by_lab(detection_colors_rgb, product_colors_rgb, max_lab_distance=80.0)
                 # color_similarity = 0.0  # Color similarity disabled
 
@@ -718,178 +717,277 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
                 total_similarity = min(total_similarity, 1.0)
 
                 logger.debug(f"Detection {i}: Index {matched_index}, Product ID {matched_product_id}, "
-                                f"CLIP Sim={clip_similarity:.4f}, Total Sim={total_similarity:.4f}")
+                            f"CLIP Sim={clip_similarity:.4f}, Total Sim={total_similarity:.4f}")
 
                 candidates.append({
-                    "product_id": matched_product_id,
-                    "product_type": product.get('product_type'),
-                    "description": product.get('description'),
-                    "product_tags": product.get('product_tags'),
                     "clip_similarity": clip_similarity,
                     "color_similarity": color_similarity,
                     "total_similarity": total_similarity,
-                    "product_dominant_colors_rgb": product_colors_rgb,
-                    "product_dominant_colors_names": rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB)
+                    "product_id": matched_product_id,
+                    "match_type": "exact" if total_similarity >= TOTAL_SIMILARITY_EXACT_THRESHOLD else \
+                                  "similar" if total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD else "no_match"
                 })
-            
-            # Re-rank candidates
+
+            # Re-rank candidates to prioritize high CLIP similarity
             if candidates:
-                candidates.sort(key=lambda x: x['total_similarity'], reverse=True)
+                # Sort by total_similarity (now just CLIP similarity)
+                candidates = sorted(
+                    candidates,
+                    key=lambda x: x["total_similarity"],  # Removed color as tiebreaker
+                    reverse=True
+                )
                 best_candidate = candidates[0]
-                best_match = best_candidate
-                best_total_similarity = best_candidate['total_similarity']
-                best_clip_similarity = best_candidate['clip_similarity']
-                best_color_similarity = best_candidate['color_similarity']
-                best_product_id = best_candidate['product_id']
+                best_total_similarity = best_candidate["total_similarity"]
+                best_clip_similarity = best_candidate["clip_similarity"]
+                best_color_similarity = best_candidate["color_similarity"]
+                best_product_id = best_candidate["product_id"]
+                best_match_type = best_candidate["match_type"]
 
-                if best_total_similarity >= TOTAL_SIMILARITY_EXACT_THRESHOLD:
-                    best_match_type = "exact_match"
-                elif best_total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD:
-                    best_match_type = "similar_match"
+                if best_match_type in ["exact", "similar"]:
+                    best_match = {
+                        "type": detection['class'],
+                        "colors": detection_colors_names,
+                        "match_type": best_match_type,
+                        "matched_product_id": str(best_product_id),
+                        "confidence": float(best_total_similarity),
+                        "clip_confidence": float(best_clip_similarity),
+                        "color_confidence": float(best_color_similarity),
+                        "crop_image_file": crop_path,
+                        "matched_product_colors": rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ["Unknown", "Unknown", "Unknown"]
+                    }
+
+            # Append only if a valid match is found
+            if best_match and best_match_type in ["exact", "similar"]:
+                matches.append(best_match)
+                logger.debug(f"Match found: product_id={best_product_id}, match_type={best_match_type}, "
+                            f"total_confidence={best_total_similarity:.4f}")
+                
+                match_index = len(matches)  # 1-based index for folder naming
+                output_dir = f"outputs/video_{video_id}/images/{match_index}"
+                os.makedirs(output_dir, exist_ok=True)
+                
+                # Save cropped image
+                cropped_output_path = os.path.join(output_dir, f"cropped_{os.path.basename(crop_path)}")
+                shutil.copy(crop_path, cropped_output_path)
+                logger.debug(f"Saved cropped image to {cropped_output_path}")
+                
+                # Save matched product image
+                product_image_path = f"data/cache/cropped_images/product_{best_product_id}.jpg"
+                if os.path.exists(product_image_path):
+                    product_output_path = os.path.join(output_dir, f"product_{best_product_id}.jpg")
+                    shutil.copy(product_image_path, product_output_path)
+                    logger.debug(f"Saved product image to {product_output_path}")
                 else:
-                    best_match_type = "no_match" # Falls below similar threshold
+                    logger.warning(f"Product image not found at {product_image_path}")
+            else:
+                logger.debug(f"Skipping detection {i}: no_match, total_confidence={best_total_similarity:.4f}, "
+                            f"clip_confidence={best_clip_similarity:.4f}")
 
-            match_result = {
-                "frame_number": detection['frame_number'],
-                "detected_class": detection['class'],
-                "bbox": detection['bbox'],
-                "detection_confidence": detection['confidence'],
-                "detection_dominant_colors_rgb": detection_colors_rgb,
-                "detection_dominant_colors_names": detection_colors_names,
-                "matched_product": {
-                    "product_id": best_product_id,
-                    "match_type": best_match_type,
-                    "clip_similarity": float(f"{best_clip_similarity:.4f}") if best_match else 0.0,
-                    "color_similarity": float(f"{best_color_similarity:.4f}") if best_match else 0.0,
-                    "total_similarity": float(f"{best_total_similarity:.4f}") if best_match else 0.0,
-                    "product_type": best_match['product_type'] if best_match else "N/A",
-                    "description": best_match['description'] if best_match else "N/A",
-                    "product_tags": best_match['product_tags'] if best_match else "N/A",
-                    "dominant_colors_rgb": best_match['product_dominant_colors_rgb'] if best_match else [],
-                    "dominant_colors_names": best_match['product_dominant_colors_names'] if best_match else []
-                }
-            }
-            matches.append(match_result)
         except Exception as e:
-            logger.error(f"Error processing detection {i}: {e}", exc_info=True)
+            logger.error(f"Error matching product for detection {i}: {e}", exc_info=True)
             matches.append({
-                "frame_number": detection['frame_number'],
-                "detected_class": detection['class'],
-                "bbox": detection['bbox'],
-                "detection_confidence": detection['confidence'],
-                "error": str(e)
+                "type": detection['class'],
+                "colors": ["Unknown", "Unknown", "Unknown"],
+                "match_type": "error",
+                "matched_product_id": None,
+                "confidence": 0.0,
+                "clip_confidence": 0.0,
+                "color_confidence": 0.0,
+                "crop_image_file": crop_path
             })
+
+    logger.debug(f"Final matches: {matches}")
     return matches
 
-def validate_json_output(data, schema_path="output_schema.json"):
-    """Validates the output JSON against a predefined schema."""
-    logger.info(f"Validating JSON output against schema: {schema_path}")
+def classify_vibe(caption, product_info, vibe_taxonomy=None):
+    """Classify video vibe based on caption and product metadata."""
+    logger.info("Classifying vibe")
+    nlp = spacy.load("en_core_web_sm")
+    vibe_keywords = {
+        'Coquette': ['darling', 'flirty', 'romance', 'dress', 'feminine', 'sweet', 'charm', 'lace', 'bow', 'heart', 'blush', 'cute'],
+        'Boho': ['summer', 'flowy', 'earthy', 'outfit', 'date', 'bohemian', 'relaxed', 'fringe', 'natural', 'breezy', 'gypsy', 'vibes'],
+        'Clean Girl': ['minimal', 'neutral', 'sleek', 'simple', 'clean', 'classic', 'chic', 'effortless', 'crisp', 'modern', 'subtle'],
+        'Cottagecore': ['vintage', 'pastel', 'nature', 'rustic', 'floral', 'cozy', 'farmhouse', 'whimsical', 'meadow', 'homemade'],
+        'Streetcore': ['urban', 'sneakers', 'graffiti', 'edgy', 'street', 'cool', 'grunge', 'skate', 'bold', 'raw', 'city'],
+        'Y2K': ['glitter', 'metallic', 'retro', 'bold', 'sparkly', 'neon', 'futuristic', 'pop', 'shiny', 'trendy', '2000s'],
+        'Party Glam': ['sparkle', 'sequin', 'bold', 'glam', 'shimmer', 'luxe', 'dazzle', 'fancy', 'evening', 'glitz', 'radiant']
+    }
+    if vibe_taxonomy:
+        vibe_keywords = {vibe: vibe_keywords.get(vibe, []) for vibe in vibe_taxonomy}
+    
+    text = caption.lower()
+    doc = nlp(text)
+    scores = {vibe: 0 for vibe in vibe_keywords}
+    for token in doc:
+        for vibe, keywords in vibe_keywords.items():
+            if token.text in keywords:
+                scores[vibe] += 1
+    logger.debug(f"Vibe scores: {scores}")
+    top_vibes = [vibe for vibe, score in sorted(scores.items(), key=lambda x: x[1], reverse=True)[:3] if score > 0]
+    return top_vibes or ["Unknown"]
+
+def validate_output(output):
+    """Validate JSON output against schema."""
+    schema = {
+        "type": "object",
+        "properties": {
+            "video_id": {"type": "string"},
+            "vibes": {"type": "array", "items": {"type": "string"}},
+            "products": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "type": {"type": "string"},
+                        "colors": {"type": "array", "items": {"type": "string"}, "minItems": 3, "maxItems": 3},
+                        "match_type": {"type": "string", "enum": ["exact", "similar", "no_match"]},
+                        "matched_product_id": {"type": ["string", "null"]},
+                        "confidence": {"type": "number"}
+                    },
+                    "required": ["type", "colors", "match_type", "matched_product_id", "confidence"]
+                }
+            }
+        },
+        "required": ["video_id", "vibes", "products"]
+    }
     try:
-        with open(schema_path, 'r') as f:
-            schema = json.load(f)
-        validate(instance=data, schema=schema)
-        logger.info("JSON output validated successfully.")
-        return True
-    except FileNotFoundError:
-        logger.error(f"Schema file not found at {schema_path}")
-        return False
+        validate(instance=output, schema=schema)
+        logger.info("Output JSON validated successfully")
     except Exception as e:
-        logger.error(f"JSON validation error: {e}")
-        return False
+        logger.error(f"Output JSON validation failed: {e}")
+        raise
 
-# --- Main execution for all videos ---
-def process_all_videos(data_dir="data", output_base_dir="output"):
+def process_single_video(video_path, images_csv, product_data_csv, caption, video_id, output_json_path, model, index, product_info, product_id_to_indices, clip_model, preprocess, device, vibe_taxonomy=None):
+    """Function to process a single video and generate output JSON."""
+    logger.info(f"Starting processing for video ID: {video_id}")
+    
+    # Process video
+    output_dir = "frames"
+    detectedframepath = "detected_frames"
+    cropped_frames_dir = "cropped_frames"
+
+    # Clean up previous runs' directories for each video
+    if os.path.exists(output_dir):
+        shutil.rmtree(output_dir)
+    if os.path.exists(detectedframepath):
+        shutil.rmtree(detectedframepath)
+    if os.path.exists(cropped_frames_dir):
+        shutil.rmtree(cropped_frames_dir)
+    
+    os.makedirs(output_dir, exist_ok=True)
+    os.makedirs(detectedframepath, exist_ok=True)
+    os.makedirs(cropped_frames_dir, exist_ok=True)
+
+    if extract_frames(video_path, output_dir):
+        detections = []
+        for frame_path in os.listdir(output_dir):
+            if frame_path.endswith(".jpg"):
+                try:
+                    frame_number_str = frame_path.split("_")[1].split(".")[0]
+                    frame_number = int(frame_number_str)
+                except (IndexError, ValueError) as e:
+                    logger.warning(f"Could not parse frame number from {frame_path}: {e}. Skipping frame.")
+                    continue
+
+                full_frame_path = os.path.join(output_dir, frame_path)
+                frame_detections = detect_objects(full_frame_path, frame_number, model, detectedframepath)
+                detections.extend(frame_detections)
+        
+        matches = match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device, video_id)
+        vibes = classify_vibe(caption, product_info, vibe_taxonomy)
+        
+        output = {
+            "video_id": video_id,
+            "vibes": vibes,
+            "products": matches
+        }
+        
+        validate_output(output)
+        
+        os.makedirs("outputs", exist_ok=True)
+        with open(output_json_path, "w") as f:
+            json.dump(output, f, indent=2)
+        logger.info(f"Saved output to {output_json_path}")
+    else:
+        logger.error(f"Failed to extract frames for video ID: {video_id}. Exiting processing for this video.")
+
+def main():
     """
-    Processes all videos in data/videos, extracts frames, detects objects,
-    matches products, and saves results in separate video-named folders.
+    Main function to orchestrate video processing.
+    Initializes models and FAISS index once, then processes all videos.
     """
-    videos_dir = os.path.join(data_dir, "videos")
-    captions_dir = os.path.join(data_dir, "captions")
-    images_csv = os.path.join(data_dir, "images.csv")
-    product_data_csv = os.path.join(data_dir, "product_data.csv")
+    base_data_dir = "data"
+    videos_dir = os.path.join(base_data_dir, "videos")
+    captions_dir = os.path.join(base_data_dir, "captions")
+    images_csv = os.path.join(base_data_dir, "images.csv")
+    product_data_csv = os.path.join(base_data_dir, "product_data.csv")
+    vibe_taxonomy = ["Coquette", "Clean Girl", "Cottagecore", "Streetcore", "Y2K", "Boho", "Party Glam"]
 
-    if not all(os.path.exists(d) for d in [videos_dir, captions_dir, images_csv, product_data_csv]):
-        logger.error("Required data directories or files are missing. Please check 'data/' structure.")
-        return
+    os.makedirs("outputs", exist_ok=True)
 
-    # Setup FAISS index once for all videos
+    # --- Initialize YOLO Model (once) ---
+    yolo_model = None
     try:
-        index, product_info, product_id_to_indices, clip_model, preprocess, device = \
-            setup_faiss_index(images_csv, product_data_csv)
+        yolo_model = YOLO("D:/Aadit/ML/Flickd/runs/detect/train3/weights/best.pt")
+        logger.info("YOLO model loaded successfully.")
     except Exception as e:
-        logger.critical(f"Failed to set up FAISS index. Exiting: {e}")
-        return
+        logger.error(f"Error loading YOLO model: {e}. Exiting.")
+        exit(1)
 
-    yolo_model = YOLO("D:/Aadit/ML/Flickd/runs/detect/train3/weights/best.pt")
+    # --- Setup FAISS Index (once) ---
+    faiss_index, product_info_data, product_id_to_indices_data, clip_model_data, preprocess_data, device_data = None, None, None, None, None, None
+    try:
+        faiss_index, product_info_data, product_id_to_indices_data, clip_model_data, preprocess_data, device_data = setup_faiss_index(images_csv, product_data_csv)
+        logger.info("FAISS index setup successfully.")
+    except Exception as e:
+        logger.error(f"Failed to setup FAISS index: {e}. Exiting.")
+        exit(1)
 
-    video_files = [f for f in os.listdir(videos_dir) if f.endswith(('.mp4', '.avi', '.mov', '.mkv'))]
+    # Get list of video files
+    video_files = [f for f in os.listdir(videos_dir) if f.endswith(".mp4")]
+
     if not video_files:
         logger.warning(f"No video files found in {videos_dir}. Exiting.")
-        return
+        return # Exit gracefully if no videos
 
-    for video_num, video_filename in enumerate(video_files):
-        video_name = os.path.splitext(video_filename)[0]
-        video_path = os.path.join(videos_dir, video_filename)
-        caption_path = os.path.join(captions_dir, f"{video_name}.json") # Assuming caption file has same name as video
+    for video_file in video_files:
+        video_id = os.path.splitext(video_file)[0]
+        video_path = os.path.join(videos_dir, video_file)
+        caption_file = os.path.join(captions_dir, f"{video_id}.txt")
 
-        video_output_dir = os.path.join(output_base_dir, f"video_{video_num + 1}")
-        frames_output_dir = os.path.join(video_output_dir, "frames")
-        detected_frames_output_dir = os.path.join(video_output_dir, "detected_frames")
-        os.makedirs(frames_output_dir, exist_ok=True)
-        os.makedirs(detected_frames_output_dir, exist_ok=True)
+        output_dir = f"outputs/video_{video_id}"
+        os.makedirs(output_dir, exist_ok=True)
+        output_json_path = f"{output_dir}/detections.json"
 
-        logger.info(f"\n--- Processing Video: {video_filename} (Output to: {video_output_dir}) ---")
+        caption = ""
 
-        # 1. Extract Frames
-        if not extract_frames(video_path, frames_output_dir):
-            logger.error(f"Skipping {video_filename} due to frame extraction failure.")
-            continue
-
-        # 2. Load Captions (if available)
-        video_captions = {}
-        if os.path.exists(caption_path):
+        if os.path.exists(caption_file):
             try:
-                with open(caption_path, 'r') as f:
-                    video_captions = json.load(f)
-                logger.info(f"Loaded captions for {video_filename}")
+                with open(caption_file, "r", encoding="utf-8") as f:
+                    caption = f.read().strip()
             except Exception as e:
-                logger.error(f"Error loading captions for {video_filename}: {e}")
+                logger.error(f"Error reading caption file {caption_file}: {e}. Skipping processing for video ID: {video_id}.")
+                continue
         else:
-            logger.warning(f"No caption file found for {video_filename} at {caption_path}")
+            logger.warning(f"Caption file not found for video ID: {video_id} at {caption_file}. Proceeding with empty caption.")
 
-        all_detections = []
-        frame_files = sorted([f for f in os.listdir(frames_output_dir) if f.endswith('.jpg')],
-                             key=lambda x: int(x.split('_')[1].split('.')[0]))
-
-        # 3. Detect Objects in Frames
-        for frame_file in frame_files:
-            frame_number = int(frame_file.split('_')[1].split('.')[0])
-            frame_path = os.path.join(frames_output_dir, frame_file)
-            detections_in_frame = detect_objects(frame_path, frame_number, yolo_model, detected_frames_output_dir)
-            all_detections.extend(detections_in_frame)
-            logger.info(f"Detected {len(detections_in_frame)} objects in frame {frame_number}")
-
-        # 4. Match Products and Integrate Captions
-        matched_results = match_products(all_detections, index, product_info, product_id_to_indices, clip_model, preprocess, device)
-
-        final_output = []
-        for result in matched_results:
-            frame_number = result['frame_number']
-            # Add caption if available for this frame
-            result['caption'] = video_captions.get(str(frame_number), "No caption available for this frame.")
-            final_output.append(result)
-
-        # 5. Save Output
-        output_json_path = os.path.join(video_output_dir, "output.json")
-        try:
-            with open(output_json_path, 'w') as f:
-                json.dump(final_output, f, indent=4)
-            logger.info(f"Analysis results saved to {output_json_path}")
-            # 6. Validate Output
-            if not validate_json_output(final_output):
-                logger.warning(f"Validation failed for {output_json_path}")
-        except Exception as e:
-            logger.error(f"Failed to save or validate JSON for {video_filename}: {e}")
+        logger.info(f"Processing video: {video_file} (ID: {video_id}) with caption: '{caption}'")
+        process_single_video(
+            video_path, 
+            images_csv, 
+            product_data_csv, 
+            caption, 
+            video_id, 
+            output_json_path, 
+            yolo_model, 
+            faiss_index, 
+            product_info_data, 
+            product_id_to_indices_data, 
+            clip_model_data, 
+            preprocess_data, 
+            device_data, 
+            vibe_taxonomy
+        )
 
 if __name__ == "__main__":
-    process_all_videos(data_dir="data", output_base_dir="output")
+    main()
