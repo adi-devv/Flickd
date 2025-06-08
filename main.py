@@ -116,8 +116,9 @@ def detect_objects(image_path, frame_number, model, detectedframepath):
     except Exception as e:
         logger.error(f"Error running YOLO on {image_path}: {e}")
         return []
-def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="data/cache", max_product_ids=1000):
-    """Set up FAISS index for product matching with CLIP embeddings, processing one image per product ID."""
+    
+def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="data/cache", max_product_ids=10):
+    """Set up FAISS index for product matching with CLIP embeddings, cropping images with YOLO to extract colors from fashion items and saving crops in cache."""
     logger.info(f"Setting up FAISS index with {images_csv} and {product_data_csv}")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
@@ -128,6 +129,8 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
     product_info_path = os.path.join(cache_dir, "product_info.pkl")
     product_id_to_indices_path = os.path.join(cache_dir, "product_id_to_indices.pkl")
     index_to_product_id_path = os.path.join(cache_dir, "index_to_product_id.json")
+    cropped_images_dir = os.path.join(cache_dir, "cropped_images")
+    os.makedirs(cropped_images_dir, exist_ok=True)
     
     # Compute checksums
     try:
@@ -157,6 +160,13 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
                 logger.info("Cache invalidated due to CSV changes")
         except Exception as e:
             logger.warning(f"Failed to load cache: {e}. Rebuilding index.")
+    
+    # Load YOLO model
+    try:
+        yolo_model = YOLO("D:/Aadit/ML/Flickd/runs/detect/train3/weights/best.pt")
+    except Exception as e:
+        logger.error(f"Error loading YOLO model: {e}")
+        raise
     
     # Build new index
     clip_model, preprocess = clip.load("ViT-B/32", device=device)
@@ -210,31 +220,48 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
             valid_image_found = False
             
             # Try processing one valid image
-            product_dominant_colors_rgb = [] # Initialize this for the current product
             for _, row in group.iterrows():
                 if valid_image_found:
                     break
                 try:
+                    # Download and load image
                     response = requests.get(row['image_url'], timeout=10)
                     response.raise_for_status()
+                    pil_image = Image.open(BytesIO(response.content))
+                    opencv_image = cv2.cvtColor(np.array(pil_image), cv2.COLOR_RGB2BGR)
                     
-                    # Convert response content to a PIL Image first for ColorThief
-                    pil_image_for_color = Image.open(BytesIO(response.content))
+                    # Run YOLO to detect fashion item
+                    results = yolo_model.predict(source=opencv_image, conf=0.5, save=False)
+                    crop = opencv_image  # Default to full image
+                    if results and results[0].boxes:
+                        # Select highest-confidence detection
+                        box = results[0].boxes[0]
+                        bbox = box.xywh[0].tolist()
+                        center_x, center_y, w, h = [int(v) for v in bbox]
+                        x = max(0, center_x - w // 2)
+                        y = max(0, center_y - h // 2)
+                        x_end = min(opencv_image.shape[1], x + w)
+                        y_end = min(opencv_image.shape[0], y + h)
+                        if (x_end - x) >= 20 and (y_end - y) >= 20:
+                            crop = opencv_image[y:y_end, x:x_end]
+                            logger.debug(f"Product {product_id}: Cropped to bbox (x={x}, y={y}, w={x_end-x}, h={y_end-y})")
+                        else:
+                            logger.warning(f"Product {product_id}: Crop too small (w={x_end-x}, h={y_end-y}), using full image")
+                    else:
+                        logger.warning(f"Product {product_id}: No objects detected, using full image for color and embedding")
                     
-                    # Convert PIL Image to OpenCV format (numpy array) for get_dominant_color
-                    # ColorThief actually needs PIL Image, but get_dominant_color expects OpenCV crop (numpy array)
-                    # Let's ensure consistency. If get_dominant_color expects OpenCV, convert to that.
-                    # Current get_dominant_color takes 'crop' which is an OpenCV numpy array.
-                    # So, we need to convert pil_image_for_color to OpenCV format.
-                    opencv_image_for_color = cv2.cvtColor(np.array(pil_image_for_color), cv2.COLOR_RGB2BGR)
-
-                    # Extract dominant colors for this product
-                    product_dominant_colors_rgb = get_dominant_color(opencv_image_for_color, num_colors=5)
+                    # Save cropped image
+                    crop_path = os.path.join(cropped_images_dir, f"product_{product_id}.jpg")
+                    cv2.imwrite(crop_path, crop)
+                    logger.debug(f"Product {product_id}: Saved cropped image to {crop_path}")
+                    
+                    # Extract dominant colors from cropped image
+                    product_dominant_colors_rgb = get_dominant_color(crop, num_colors=5)
                     logger.debug(f"Product {product_id}: Extracted dominant RGBs: {product_dominant_colors_rgb}")
-
-
-                    # Now, process for CLIP embedding (requires PIL image, then preprocess)
-                    image_for_clip = preprocess(pil_image_for_color).unsqueeze(0).to(device)
+                    
+                    # Process for CLIP embedding
+                    crop_pil = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
+                    image_for_clip = preprocess(crop_pil).unsqueeze(0).to(device)
                     with torch.no_grad():
                         embedding = clip_model.encode_image(image_for_clip).cpu().numpy()
                         embedding = embedding / np.linalg.norm(embedding, axis=1, keepdims=True)
@@ -242,9 +269,6 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
                     embeddings.append(embedding)
                     product_indices.append(current_index)
                     index_to_product_id[current_index] = str(product_id)
-                    if current_index == 2196: # This specific log might not be relevant unless for debugging
-                        logger.info(f"FAISS index 2196 assigned to product ID {product_id}, image {row['image_url']}")
-                    logger.debug(f"Index {current_index} mapped to product_id {product_id}, image {row['image_url']}")
                     current_index += 1
                     valid_image_found = True
                 except Exception as e:
@@ -252,60 +276,48 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
                     continue
             
             if valid_image_found:
-                # Add the dominant_colors_rgb to the product_info dictionary
                 product_info.append({
                     "id": str(product_id),
                     "product_type": product_data.get('product_type', 'unknown'),
                     "description": product_data.get('description', ''),
                     "product_tags": product_data.get('product_tags', ''),
-                    "dominant_colors_rgb": product_dominant_colors_rgb # <--- ADDED THIS LINE
+                    "dominant_colors_rgb": product_dominant_colors_rgb
                 })
                 product_id_to_indices[str(product_id)] = product_indices
                 successful_product_ids += 1
-                logger.info(f"SUCCESS COUNT - {successful_product_ids} Processed 1 image for product ID {product_id}")
+                logger.info(f"Processed product ID {product_id} ({successful_product_ids}/{max_product_ids})")
             else:
                 logger.warning(f"No valid images found for product ID {product_id}")
                 invalid_product_ids.append(product_id)
-                # Ensure product_info still gets an entry, even if colors are empty
                 product_info.append({
                     "id": str(product_id),
                     "product_type": product_data.get('product_type', 'unknown'),
                     "description": product_data.get('description', ''),
                     "product_tags": product_data.get('product_tags', ''),
-                    "dominant_colors_rgb": [] # <--- ADDED THIS FOR EMPTY CASE
+                    "dominant_colors_rgb": []
                 })
         
         # Log if all product IDs are processed
         if successful_product_ids < max_product_ids:
-            logger.info(f"Processed all {successful_product_ids} available product IDs. No more product IDs to process, continuing.")
+            logger.info(f"Processed all {successful_product_ids} available product IDs")
         
-        # Remove invalid product IDs from CSVs (optional, but good for data cleanliness)
+        # Remove invalid product IDs from CSVs
         if invalid_product_ids:
-            logger.info(f"Removing {len(invalid_product_ids)} product IDs with no valid images from CSVs")
+            logger.info(f"Removing {len(invalid_product_ids)} invalid product IDs from CSVs")
             images_df = images_df[~images_df[id_column].isin(invalid_product_ids)]
             images_df.to_csv(images_csv, index=False)
-            logger.info(f"Updated {images_csv} with {len(images_df)} rows")
             product_df = product_df[~product_df[id_column].isin(invalid_product_ids)]
             product_df.to_csv(product_data_csv, index=False)
-            logger.info(f"Updated {product_data_csv} with {len(product_df)} rows")
         
         if not embeddings:
-            raise ValueError("No valid embeddings generated from catalog images")
-        
-        # Convert embeddings to NumPy array
-        embeddings_array = np.vstack(embeddings)  # Shape: (n, 512)
-        embeddings_array = embeddings_array / np.linalg.norm(embeddings_array, axis=1, keepdims=True)
-        dimension = embeddings_array.shape[1]
+            raise ValueError("No valid embeddings generated")
         
         # Create FAISS index
+        embeddings_array = np.vstack(embeddings)
+        dimension = embeddings_array.shape[1]
         index = faiss.IndexFlatIP(dimension)
         index.add(embeddings_array)
         logger.info(f"FAISS index created with {index.ntotal} embeddings")
-        
-        # Save index-to-product mapping
-        with open(index_to_product_id_path, "w") as f:
-            json.dump(index_to_product_id, f, indent=2)
-        logger.info(f"Saved index-to-product mapping to {index_to_product_id_path}")
         
         # Save cache
         cache_metadata = {
@@ -319,7 +331,9 @@ def setup_faiss_index(images_csv, product_data_csv, id_column="id", cache_dir="d
             pickle.dump(product_info, f)
         with open(product_id_to_indices_path, "wb") as f:
             pickle.dump(product_id_to_indices, f)
-        logger.info("Saved FAISS index and metadata to cache")
+        with open(index_to_product_id_path, "w") as f:
+            json.dump(index_to_product_id, f, indent=2)
+        logger.info("Saved FAISS index, metadata, and cropped images to cache")
         
         return index, product_info, product_id_to_indices, clip_model, preprocess, device
     
@@ -440,6 +454,7 @@ for name, rgb in FASHION_COLOR_MAP_RGB.items():
     bgr = np.uint8([[list(rgb)]])
     lab = cv2.cvtColor(bgr, cv2.COLOR_RGB2LAB)[0][0]
     FASHION_COLOR_MAP_LAB[name] = lab
+
 def get_dominant_color(crop, num_colors=5, quality=10, center_region_percentage=0.5):
     """
     Extracts dominant RGB colors from a crop, prioritizing the center region.
@@ -578,7 +593,7 @@ def compare_colors_by_lab(rgb_list1, rgb_list2, max_lab_distance=100.0):
 
 # --- Main Matching Function ---
 def match_products(detections, index, product_info, product_id_to_indices, clip_model, preprocess, device):
-    """Match detected objects to catalog products using CLIP and FAISS."""
+    """Match detected objects to catalog products, targeting confidence >= 0.9 for exact and >= 0.75 for similar, excluding no_match."""
     logger.info("Matching products to detections")
     if not detections:
         logger.warning("No detections provided to match_products")
@@ -589,16 +604,14 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
     logger.debug(f"FAISS index size: {index.ntotal} embeddings")
     
     matches = []
-    # Convert product_info to a dictionary for faster lookup by product_id
     product_info_dict = {p['id']: p for p in product_info}
 
-    # Define weights for visual and color similarity
-    WEIGHT_CLIP = 0.75
-    WEIGHT_COLOR = 0.25
-
-    # Thresholds for combined similarity
-    TOTAL_SIMILARITY_EXACT_THRESHOLD = 0.80
-    TOTAL_SIMILARITY_SIMILAR_THRESHOLD = 0.40
+    # Define thresholds and parameters
+    MIN_CLIP_SIMILARITY = 0.25  # Low to allow more candidates
+    MIN_COLOR_SIMILARITY = 0.15  # Low to allow more candidates
+    TOTAL_SIMILARITY_EXACT_THRESHOLD = 0.90  # Target for exact matches
+    TOTAL_SIMILARITY_SIMILAR_THRESHOLD = 0.6  # Target for similar matches
+    TOP_K = 20  # Consider more candidates
 
     for i, detection in enumerate(detections):
         try:
@@ -608,102 +621,141 @@ def match_products(detections, index, product_info, product_id_to_indices, clip_
             cv2.imwrite(crop_path, crop)
             crop_image = Image.fromarray(cv2.cvtColor(crop, cv2.COLOR_BGR2RGB))
 
+            # Dynamic weights based on object type
+            if detection['class'] in ['dress', 'skirt', 'shirt']:
+                WEIGHT_CLIP = 0.45  # Slightly favor color for clothing
+                WEIGHT_COLOR = 0.55
+            else:  # e.g., bag, shoe
+                WEIGHT_CLIP = 0.55  # Slightly favor CLIP for accessories
+                WEIGHT_COLOR = 0.45
+
             # --- Visual (CLIP) Embedding & Search ---
             image_input = preprocess(crop_image).unsqueeze(0).to(device)
             with torch.no_grad():
                 query_embedding = clip_model.encode_image(image_input).cpu().numpy()
                 query_embedding = query_embedding / np.linalg.norm(query_embedding, axis=1, keepdims=True)
 
-            distances, indices = index.search(query_embedding, k=1) 
+            # Search for top-k matches
+            distances, indices = index.search(query_embedding, k=TOP_K)
+            logger.debug(f"Detection {i}: Top {TOP_K} FAISS indices: {indices[0]}, distances: {distances[0]}")
 
-            clip_similarity = 0.0
-            matched_index = -1
-            if indices[0][0] != -1:
-                matched_index = indices[0][0]
-                # Assuming your FAISS index (like IndexFlatIP) returns cosine similarity directly
-                clip_similarity = distances[0][0]
-            else:
-                logger.debug(f"Detection {i}: No valid visual match found by FAISS (index -1).")
-
-            # --- Color Extraction for Detection (RGBs) and Naming (for display) ---
-            detection_colors_rgb = get_dominant_color(crop) # Get RGB tuples
+            # --- Color Extraction for Detection ---
+            detection_colors_rgb = get_dominant_color(crop)
             detection_colors_names = rgb_to_color_names(detection_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3)
             logger.debug(f"Detection {i} dominant color names: {detection_colors_names}")
 
-            matched_product_id = None
-            product_colors_rgb = []
-            product_colors_names = [] 
+            # --- Evaluate Top-K Matches ---
+            best_match = None
+            best_total_similarity = -1.0
+            best_clip_similarity = 0.0
+            best_color_similarity = 0.0
+            best_product_id = None
+            best_match_type = "no_match"
 
-            if matched_index != -1:
+            # Store all valid candidates for re-ranking
+            candidates = []
+            for j in range(TOP_K):
+                if indices[0][j] == -1:
+                    continue
+                clip_similarity = distances[0][j]
+                matched_index = indices[0][j]
+
+                # Find corresponding product ID
+                matched_product_id = None
                 for product_id, idx_list in product_id_to_indices.items():
                     if matched_index in idx_list:
                         matched_product_id = product_id
                         break
 
-            if matched_product_id is None and matched_index != -1:
-                logger.warning(f"No product ID found for matched index {matched_index}. This might indicate a discrepancy.")
+                if matched_product_id is None:
+                    logger.warning(f"No product ID found for matched index {matched_index}")
+                    continue
 
-            product = product_info_dict.get(matched_product_id)
+                product = product_info_dict.get(matched_product_id)
+                if not product:
+                    logger.warning(f"No product info for product ID {matched_product_id}")
+                    continue
 
-            if product:
-                # --- Assume product_info now contains 'dominant_colors_rgb' ---
+                # --- Color Similarity ---
                 product_colors_rgb = product.get('dominant_colors_rgb', [])
                 if not product_colors_rgb:
-                    logger.warning(f"Product ID {matched_product_id} missing 'dominant_colors_rgb' in product_info.")
-                product_colors_names = rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3)
-                logger.debug(f"Matched product {matched_product_id} dominant color names: {product_colors_names}")
+                    logger.warning(f"Product ID {matched_product_id} missing 'dominant_colors_rgb'")
+                    color_similarity = 0.0
+                else:
+                    logger.debug(f"Product ID colors are {rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ["Unknown", "Unknown", "Unknown"]} == {detection_colors_names}")
+                    
+                    color_similarity = compare_colors_by_lab(detection_colors_rgb, product_colors_rgb, max_lab_distance=80.0)
+                
+                # Apply minimum thresholds
+                if clip_similarity < MIN_CLIP_SIMILARITY or color_similarity < MIN_COLOR_SIMILARITY:
+                    logger.debug(f"Detection {i}: Index {matched_index} rejected (CLIP={clip_similarity:.4f}, Color={color_similarity:.4f})")
+                    continue
 
-            # --- Combine Similarities: Color Similarity using LAB values ---
-            color_similarity = compare_colors_by_lab(detection_colors_rgb, product_colors_rgb) if product else 0.0
+                # Compute total similarity
+                total_similarity = (WEIGHT_CLIP * clip_similarity) + (WEIGHT_COLOR * color_similarity)
+                total_similarity = min(total_similarity, 1.0)
 
-            total_similarity = (WEIGHT_CLIP * clip_similarity) + (WEIGHT_COLOR * color_similarity)
-            total_similarity = min(total_similarity, 1.0) # Cap at 1.0
+                logger.debug(f"Detection {i}: Index {matched_index}, Product ID {matched_product_id}, "
+                            f"CLIP Sim={clip_similarity:.4f}, Color Sim={color_similarity:.4f}, Total Sim={total_similarity:.4f}")
 
-
-            logger.debug(f"Detection {i}: CLIP Sim={clip_similarity:.4f}, Color Sim (LAB)={color_similarity:.4f}, Total Sim={total_similarity:.4f}")
-
-            # --- Determine Match Type based on Combined Similarity ---
-            match_type = "exact" if total_similarity > TOTAL_SIMILARITY_EXACT_THRESHOLD else \
-                         "similar" if total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD else \
-                         "no_match"
-
-            if product and match_type != "no_match":
-                matches.append({
-                    "type": detection['class'],
-                    "colors": detection_colors_names, # Reverted to 'colors' key for schema
-                    "match_type": match_type,
-                    "matched_product_id": str(matched_product_id),
-                    "confidence": float(total_similarity),
-                    "clip_confidence": float(clip_similarity), 
-                    "color_confidence": float(color_similarity), 
-                    "crop_image_file": crop_path
+                candidates.append({
+                    "clip_similarity": clip_similarity,
+                    "color_similarity": color_similarity,
+                    "total_similarity": total_similarity,
+                    "product_id": matched_product_id,
+                    "match_type": "exact" if total_similarity > TOTAL_SIMILARITY_EXACT_THRESHOLD else \
+                                  "similar" if total_similarity >= TOTAL_SIMILARITY_SIMILAR_THRESHOLD else "no_match"
                 })
-                logger.debug(f"Match found: product_id={matched_product_id}, match_type={match_type}, total_confidence={total_similarity:.4f}")
+
+            # Re-rank candidates to prioritize high CLIP and color similarity
+            if candidates:
+                # Sort by total_similarity, prioritizing balanced CLIP and color similarity
+                candidates = sorted(
+                    candidates,
+                    key=lambda x: (x["total_similarity"], min(x["clip_similarity"], x["color_similarity"])),
+                    reverse=True
+                )
+                best_candidate = candidates[0]
+                best_total_similarity = best_candidate["total_similarity"]
+                best_clip_similarity = best_candidate["clip_similarity"]
+                best_color_similarity = best_candidate["color_similarity"]
+                best_product_id = best_candidate["product_id"]
+                best_match_type = best_candidate["match_type"]
+
+                if best_match_type in ["exact", "similar"]:
+                    best_match = {
+                        "type": detection['class'],
+                        "colors": detection_colors_names,
+                        "match_type": best_match_type,
+                        "matched_product_id": str(best_product_id),
+                        "confidence": float(best_total_similarity),
+                        "clip_confidence": float(best_clip_similarity),
+                        "color_confidence": float(best_color_similarity),
+                        "crop_image_file": crop_path,
+                        "matched_product_colors": rgb_to_color_names(product_colors_rgb, FASHION_COLOR_MAP_LAB, max_colors=3) if product_colors_rgb else ["Unknown", "Unknown", "Unknown"]                    }
+
+            # Append only if a valid match is found
+            if best_match and best_match_type in ["exact", "similar", "no_match"]:
+                matches.append(best_match)
+                logger.debug(f"Match found: product_id={best_product_id}, match_type={best_match_type}, "
+                            f"total_confidence={best_total_similarity:.4f}")
             else:
-                matches.append({
-                    "type": detection['class'],
-                    "colors": detection_colors_names, # Reverted to 'colors' key for schema
-                    "match_type": "no_match",
-                    "matched_product_id": None,
-                    "confidence": float(total_similarity),
-                    "clip_confidence": float(clip_similarity),
-                    "color_confidence": float(color_similarity),
-                    "crop_image_file": crop_path
-                })
-                logger.debug(f"No match for detection {i}: match_type=no_match, total_confidence={total_similarity:.4f}")
+                logger.debug(f"Skipping detection {i}: no_match, total_confidence={best_total_similarity:.4f}, "
+                            f"clip_confidence={best_clip_similarity:.4f}, color_confidence={best_color_similarity:.4f}")
 
         except Exception as e:
             logger.error(f"Error matching product for detection {i}: {e}", exc_info=True)
             matches.append({
                 "type": detection['class'],
-                "colors": ["Unknown", "Unknown", "Unknown"], # Ensure 3 strings for schema
-                "match_type": "error", # Use 'error' if schema allows, else 'no_match'
+                "colors": ["Unknown", "Unknown", "Unknown"],
+                "match_type": "error",
                 "matched_product_id": None,
                 "confidence": 0.0,
                 "clip_confidence": 0.0,
                 "color_confidence": 0.0,
                 "crop_image_file": crop_path
             })
+
     logger.debug(f"Final matches: {matches}")
     return matches
 
