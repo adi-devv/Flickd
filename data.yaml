@@ -1,8 +1,0 @@
-train: dataset/colorful_fashion/train
-val: dataset/colorful_fashion/test
-
-# number of classes
-nc: 10
-
-# class names
-names: ['sunglass','hat','jacket','top','pants','shorts','skirt','dress','bag','shoe']
