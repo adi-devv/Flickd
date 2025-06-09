@@ -1,0 +1,521 @@
+{
+  "video_id": "2025-05-27_13-46-16_UTC",
+  "vibes": [
+    "Boho"
+  ],
+  "products": [
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Taupe",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8635758757591248,
+      "clip_confidence": 0.8635758757591248,
+      "color_confidence": 0.012969032779115923,
+      "crop_image_file": "cropped_frames/crop_frame_0_dress_0.jpg",
+      "matched_product_colors": [
+        "Off-White",
+        "Black",
+        "Lavender"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Taupe",
+        "Black"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8741006255149841,
+      "clip_confidence": 0.8741006255149841,
+      "color_confidence": 0.04069453449967362,
+      "crop_image_file": "cropped_frames/crop_frame_10_dress_1.jpg",
+      "matched_product_colors": [
+        "Cyan",
+        "Denim",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Cyan",
+        "Lavender"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16631",
+      "confidence": 0.8007659912109375,
+      "clip_confidence": 0.8007659912109375,
+      "color_confidence": 0.011134320480524757,
+      "crop_image_file": "cropped_frames/crop_frame_130_shirt_2.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Taupe",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Powder Blue",
+        "Black"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8116094470024109,
+      "clip_confidence": 0.8116094470024109,
+      "color_confidence": 0.0016953715794912612,
+      "crop_image_file": "cropped_frames/crop_frame_140_shirt_3.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Denim",
+        "Teal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Powder Blue",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8446899652481079,
+      "clip_confidence": 0.8446899652481079,
+      "color_confidence": 0.001710027862178023,
+      "crop_image_file": "cropped_frames/crop_frame_150_shirt_4.jpg",
+      "matched_product_colors": [
+        "Off-White",
+        "Powder Blue",
+        "Black"
+      ]
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Cyan",
+        "Ash Gray",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42118",
+      "confidence": 0.7669707536697388,
+      "clip_confidence": 0.7669707536697388,
+      "color_confidence": 0.012523843152296543,
+      "crop_image_file": "cropped_frames/crop_frame_190_bag_5.jpg",
+      "matched_product_colors": [
+        "Yellow",
+        "Baby Blue",
+        "Yellow"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Off-White",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.873155951499939,
+      "clip_confidence": 0.873155951499939,
+      "color_confidence": 0.008841577123082138,
+      "crop_image_file": "cropped_frames/crop_frame_20_dress_6.jpg",
+      "matched_product_colors": [
+        "Silver",
+        "Toffee",
+        "Cyan"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Powder Blue",
+        "Taupe",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.792344331741333,
+      "clip_confidence": 0.792344331741333,
+      "color_confidence": 0.034534025953358194,
+      "crop_image_file": "cropped_frames/crop_frame_260_shirt_7.jpg",
+      "matched_product_colors": [
+        "Silver",
+        "Umber",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "pants",
+      "colors": [
+        "Powder Blue",
+        "Slate Gray",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8811111450195312,
+      "clip_confidence": 0.8811111450195312,
+      "color_confidence": 0.009751049515676688,
+      "crop_image_file": "cropped_frames/crop_frame_260_pants_8.jpg",
+      "matched_product_colors": [
+        "Off-White",
+        "Powder Blue",
+        "Black"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Powder Blue",
+        "Black",
+        "Lavender"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17115",
+      "confidence": 0.8071220517158508,
+      "clip_confidence": 0.8071220517158508,
+      "color_confidence": 0.005962067998044434,
+      "crop_image_file": "cropped_frames/crop_frame_270_shirt_9.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Taupe",
+        "Denim"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Lavender",
+        "Black"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8383148908615112,
+      "clip_confidence": 0.8383148908615112,
+      "color_confidence": 0.00758361260577185,
+      "crop_image_file": "cropped_frames/crop_frame_30_dress_10.jpg",
+      "matched_product_colors": [
+        "Clay",
+        "Black",
+        "Umber"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Teal",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8418787717819214,
+      "clip_confidence": 0.8418787717819214,
+      "color_confidence": 0.006351353847068469,
+      "crop_image_file": "cropped_frames/crop_frame_310_shirt_11.jpg",
+      "matched_product_colors": [
+        "Platinum",
+        "Taupe",
+        "Denim"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Slate Gray",
+        "Lavender",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.845721423625946,
+      "clip_confidence": 0.845721423625946,
+      "color_confidence": 0.005438971242814131,
+      "crop_image_file": "cropped_frames/crop_frame_320_shirt_12.jpg",
+      "matched_product_colors": [
+        "Silver",
+        "Burgundy",
+        "Black"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Teal",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8656445741653442,
+      "clip_confidence": 0.8656445741653442,
+      "color_confidence": 0.004261045601290582,
+      "crop_image_file": "cropped_frames/crop_frame_330_shirt_13.jpg",
+      "matched_product_colors": [
+        "Platinum",
+        "Ivory",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Off-White",
+        "Black",
+        "Off-White"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42029",
+      "confidence": 0.835047721862793,
+      "clip_confidence": 0.835047721862793,
+      "color_confidence": 0.030422492677727737,
+      "crop_image_file": "cropped_frames/crop_frame_50_bag_14.jpg",
+      "matched_product_colors": [
+        "Ash Gray",
+        "Teal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "pants",
+      "colors": [
+        "Powder Blue",
+        "Black",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.873704195022583,
+      "clip_confidence": 0.873704195022583,
+      "color_confidence": 0.008886181921810645,
+      "crop_image_file": "cropped_frames/crop_frame_70_pants_15.jpg",
+      "matched_product_colors": [
+        "Slate Gray",
+        "Powder Blue",
+        "Cyan"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Cerulean",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.822422981262207,
+      "clip_confidence": 0.822422981262207,
+      "color_confidence": 0.0027233971917046858,
+      "crop_image_file": "cropped_frames/crop_frame_70_shirt_16.jpg",
+      "matched_product_colors": [
+        "Tan",
+        "Taupe",
+        "Tan"
+      ]
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Charcoal",
+        "Lavender",
+        "Black"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15363",
+      "confidence": 0.8406157493591309,
+      "clip_confidence": 0.8406157493591309,
+      "color_confidence": 0.015822106175492023,
+      "crop_image_file": "cropped_frames/crop_frame_70_shoe_17.jpg",
+      "matched_product_colors": [
+        "Slate Gray",
+        "Charcoal",
+        "Sky Blue"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Powder Blue",
+        "Black",
+        "Lavender"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17115",
+      "confidence": 0.7682396769523621,
+      "clip_confidence": 0.7682396769523621,
+      "color_confidence": 0.002541729997432459,
+      "crop_image_file": "cropped_frames/crop_frame_70_shirt_18.jpg",
+      "matched_product_colors": [
+        "Taupe",
+        "Powder Blue",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Teal",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8342573046684265,
+      "clip_confidence": 0.8342573046684265,
+      "color_confidence": 0.004942011467939285,
+      "crop_image_file": "cropped_frames/crop_frame_80_shirt_19.jpg",
+      "matched_product_colors": [
+        "Teal",
+        "Sky Blue",
+        "Violet"
+      ]
+    },
+    {
+      "type": "pants",
+      "colors": [
+        "Black",
+        "Powder Blue",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42118",
+      "confidence": 0.8554333448410034,
+      "clip_confidence": 0.8554333448410034,
+      "color_confidence": 0.010229121545655168,
+      "crop_image_file": "cropped_frames/crop_frame_80_pants_20.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Charcoal",
+        "Black"
+      ]
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Charcoal",
+        "Black",
+        "Lavender"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15363",
+      "confidence": 0.8578794598579407,
+      "clip_confidence": 0.8578794598579407,
+      "color_confidence": 0.01716780230839695,
+      "crop_image_file": "cropped_frames/crop_frame_80_shoe_21.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Berry",
+        "Lavender"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Powder Blue",
+        "Black",
+        "Off-White"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17115",
+      "confidence": 0.7557845115661621,
+      "clip_confidence": 0.7557845115661621,
+      "color_confidence": 0.010734489942341757,
+      "crop_image_file": "cropped_frames/crop_frame_80_shirt_22.jpg",
+      "matched_product_colors": [
+        "Taupe",
+        "Powder Blue",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Lavender",
+        "Cerulean",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8434625864028931,
+      "clip_confidence": 0.8434625864028931,
+      "color_confidence": 0.0027518988034365035,
+      "crop_image_file": "cropped_frames/crop_frame_90_shirt_23.jpg",
+      "matched_product_colors": [
+        "Berry",
+        "Charcoal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "pants",
+      "colors": [
+        "Black",
+        "Powder Blue",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42118",
+      "confidence": 0.8395067453384399,
+      "clip_confidence": 0.8395067453384399,
+      "color_confidence": 0.017620571344525736,
+      "crop_image_file": "cropped_frames/crop_frame_90_pants_24.jpg",
+      "matched_product_colors": [
+        "Cyan",
+        "Sky Blue",
+        "Teal"
+      ]
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Lavender",
+        "Charcoal",
+        "Cyan"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15363",
+      "confidence": 0.8500736951828003,
+      "clip_confidence": 0.8500736951828003,
+      "color_confidence": 0.009216397600725797,
+      "crop_image_file": "cropped_frames/crop_frame_90_shoe_25.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Berry",
+        "Lavender"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Powder Blue",
+        "Black",
+        "Lavender"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.7859838008880615,
+      "clip_confidence": 0.7859838008880615,
+      "color_confidence": 0.005734880769723673,
+      "crop_image_file": "cropped_frames/crop_frame_90_shirt_26.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Denim",
+        "Teal"
+      ]
+    }
+  ]
+}

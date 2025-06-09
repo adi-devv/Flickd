@@ -1,0 +1,1053 @@
+{
+  "video_id": "2025-05-28_13-40-09_UTC",
+  "vibes": [
+    "Boho"
+  ],
+  "products": [
+    {
+      "type": "dress",
+      "colors": [
+        "Teal",
+        "Powder Blue",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8499380350112915,
+      "clip_confidence": 0.8499380350112915,
+      "color_confidence": 0.014429039674855332,
+      "crop_image_file": "cropped_frames/crop_frame_100_dress_0.jpg",
+      "matched_product_colors": [
+        "Berry",
+        "Charcoal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Sky Blue",
+        "Teal",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15777",
+      "confidence": 0.8291295766830444,
+      "clip_confidence": 0.8291295766830444,
+      "color_confidence": 0.0033180984047639743,
+      "crop_image_file": "cropped_frames/crop_frame_100_dress_1.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Clay",
+        "Umber"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Slate Gray",
+        "Cyan"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.860697329044342,
+      "clip_confidence": 0.860697329044342,
+      "color_confidence": 0.0271835355487492,
+      "crop_image_file": "cropped_frames/crop_frame_110_dress_2.jpg",
+      "matched_product_colors": [
+        "Pastel Blue",
+        "Umber",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Charcoal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8716821670532227,
+      "clip_confidence": 0.8716821670532227,
+      "color_confidence": 0.04358059099220405,
+      "crop_image_file": "cropped_frames/crop_frame_120_dress_3.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Taupe",
+        "Denim"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Cyan",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8492345809936523,
+      "clip_confidence": 0.8492345809936523,
+      "color_confidence": 0.020652459019269338,
+      "crop_image_file": "cropped_frames/crop_frame_130_dress_4.jpg",
+      "matched_product_colors": [
+        "Tan",
+        "Taupe",
+        "Tan"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Teal",
+        "Powder Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8349416255950928,
+      "clip_confidence": 0.8349416255950928,
+      "color_confidence": 0.008327441157142948,
+      "crop_image_file": "cropped_frames/crop_frame_140_dress_5.jpg",
+      "matched_product_colors": [
+        "Pastel Blue",
+        "Slate Gray",
+        "Teal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Teal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8397126793861389,
+      "clip_confidence": 0.8397126793861389,
+      "color_confidence": 0.00520433845959182,
+      "crop_image_file": "cropped_frames/crop_frame_150_dress_6.jpg",
+      "matched_product_colors": [
+        "Off-White",
+        "Powder Blue",
+        "Black"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Teal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42119",
+      "confidence": 0.8412659764289856,
+      "clip_confidence": 0.8412659764289856,
+      "color_confidence": 0.007778320906754388,
+      "crop_image_file": "cropped_frames/crop_frame_160_dress_7.jpg",
+      "matched_product_colors": [
+        "Burgundy",
+        "Clay",
+        "Sienna"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Charcoal",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42055",
+      "confidence": 0.8524676561355591,
+      "clip_confidence": 0.8524676561355591,
+      "color_confidence": 0.014262960763970194,
+      "crop_image_file": "cropped_frames/crop_frame_170_dress_8.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Cyan",
+        "Black"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Ash Gray",
+        "Charcoal",
+        "Denim"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16527",
+      "confidence": 0.8211969137191772,
+      "clip_confidence": 0.8211969137191772,
+      "color_confidence": 0.0034062998906132518,
+      "crop_image_file": "cropped_frames/crop_frame_200_dress_9.jpg",
+      "matched_product_colors": [
+        "Pastel Blue",
+        "Taupe",
+        "Clay"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Powder Blue",
+        "Teal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16548",
+      "confidence": 0.84879070520401,
+      "clip_confidence": 0.84879070520401,
+      "color_confidence": 0.015553018761033807,
+      "crop_image_file": "cropped_frames/crop_frame_210_skirt_10.jpg",
+      "matched_product_colors": [
+        "Off-White",
+        "Black",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Cyan",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17305",
+      "confidence": 0.8337512612342834,
+      "clip_confidence": 0.8337512612342834,
+      "color_confidence": 0.006734353323897292,
+      "crop_image_file": "cropped_frames/crop_frame_210_dress_11.jpg",
+      "matched_product_colors": [
+        "Emerald",
+        "Silver",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Powder Blue",
+        "Teal",
+        "Powder Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16631",
+      "confidence": 0.8462989926338196,
+      "clip_confidence": 0.8462989926338196,
+      "color_confidence": 0.007428190469395887,
+      "crop_image_file": "cropped_frames/crop_frame_240_skirt_13.jpg",
+      "matched_product_colors": [
+        "Umber",
+        "Black",
+        "Tan"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Sky Blue",
+        "Charcoal",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15322",
+      "confidence": 0.8103675842285156,
+      "clip_confidence": 0.8103675842285156,
+      "color_confidence": 0.12377887816647241,
+      "crop_image_file": "cropped_frames/crop_frame_280_dress_14.jpg",
+      "matched_product_colors": [
+        "Berry",
+        "Charcoal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Charcoal",
+        "Silver",
+        "Black"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42082",
+      "confidence": 0.7968981266021729,
+      "clip_confidence": 0.7968981266021729,
+      "color_confidence": 0.016203971756858733,
+      "crop_image_file": "cropped_frames/crop_frame_290_dress_15.jpg",
+      "matched_product_colors": [
+        "Berry",
+        "Charcoal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Black",
+        "Ash Gray",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42064",
+      "confidence": 0.8365278840065002,
+      "clip_confidence": 0.8365278840065002,
+      "color_confidence": 0.00801948835989464,
+      "crop_image_file": "cropped_frames/crop_frame_300_bag_16.jpg",
+      "matched_product_colors": [
+        "Ash Gray",
+        "Slate Gray",
+        "Powder Blue"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Charcoal",
+        "Silver",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "14980",
+      "confidence": 0.8362468481063843,
+      "clip_confidence": 0.8362468481063843,
+      "color_confidence": 0.015111160783033524,
+      "crop_image_file": "cropped_frames/crop_frame_300_dress_17.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Pastel Blue",
+        "Ash Gray"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Silver",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8474056720733643,
+      "clip_confidence": 0.8474056720733643,
+      "color_confidence": 0.039677989276413576,
+      "crop_image_file": "cropped_frames/crop_frame_330_dress_18.jpg",
+      "matched_product_colors": [
+        "Burgundy",
+        "Clay",
+        "Sienna"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Silver",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8564907312393188,
+      "clip_confidence": 0.8564907312393188,
+      "color_confidence": 0.009955130431095588,
+      "crop_image_file": "cropped_frames/crop_frame_340_dress_19.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Silver",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Silver",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8092665076255798,
+      "clip_confidence": 0.8092665076255798,
+      "color_confidence": 0.07576953707403254,
+      "crop_image_file": "cropped_frames/crop_frame_350_dress_20.jpg",
+      "matched_product_colors": [
+        "Olive Green",
+        "Silver",
+        "Sage Green"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Silver",
+        "Slate Gray",
+        "Silver"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8334463834762573,
+      "clip_confidence": 0.8334463834762573,
+      "color_confidence": 0.008856927578520093,
+      "crop_image_file": "cropped_frames/crop_frame_350_skirt_21.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Cyan",
+        "Black"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Silver",
+        "Charcoal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15460",
+      "confidence": 0.7973965406417847,
+      "clip_confidence": 0.7973965406417847,
+      "color_confidence": 0.015980892248171497,
+      "crop_image_file": "cropped_frames/crop_frame_360_dress_22.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Taupe",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Slate Gray",
+        "Charcoal",
+        "Black"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15777",
+      "confidence": 0.8010091781616211,
+      "clip_confidence": 0.8010091781616211,
+      "color_confidence": 0.008611935546495905,
+      "crop_image_file": "cropped_frames/crop_frame_370_dress_23.jpg",
+      "matched_product_colors": [
+        "Sky Blue",
+        "Violet",
+        "Cerulean"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Slate Gray",
+        "Black",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15668",
+      "confidence": 0.7985801696777344,
+      "clip_confidence": 0.7985801696777344,
+      "color_confidence": 0.05714466907685342,
+      "crop_image_file": "cropped_frames/crop_frame_380_shirt_24.jpg",
+      "matched_product_colors": [
+        "Olive Green",
+        "Copper",
+        "Olive Green"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Slate Gray",
+        "Charcoal",
+        "Powder Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8030062913894653,
+      "clip_confidence": 0.8030062913894653,
+      "color_confidence": 0.022548048826275695,
+      "crop_image_file": "cropped_frames/crop_frame_390_shirt_25.jpg",
+      "matched_product_colors": [
+        "Burgundy",
+        "Clay",
+        "Sienna"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Ash Gray",
+        "Platinum",
+        "Charcoal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8327017426490784,
+      "clip_confidence": 0.8327017426490784,
+      "color_confidence": 0.035532485869941476,
+      "crop_image_file": "cropped_frames/crop_frame_400_dress_26.jpg",
+      "matched_product_colors": [
+        "Denim",
+        "Cerulean",
+        "Denim"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Silver",
+        "Taupe",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8568538427352905,
+      "clip_confidence": 0.8568538427352905,
+      "color_confidence": 0.0263699843695641,
+      "crop_image_file": "cropped_frames/crop_frame_410_dress_27.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Cyan",
+        "Powder Blue"
+      ]
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Taupe",
+        "Charcoal",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16887",
+      "confidence": 0.7678214907646179,
+      "clip_confidence": 0.7678214907646179,
+      "color_confidence": 0.05609183752013484,
+      "crop_image_file": "cropped_frames/crop_frame_410_shoe_28.jpg",
+      "matched_product_colors": [
+        "Umber",
+        "Black",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Silver",
+        "Charcoal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "97561",
+      "confidence": 0.7780376076698303,
+      "clip_confidence": 0.7780376076698303,
+      "color_confidence": 0.008532399768955742,
+      "crop_image_file": "cropped_frames/crop_frame_420_dress_29.jpg",
+      "matched_product_colors": [
+        "Silver",
+        "Toffee",
+        "Cyan"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16631",
+      "confidence": 0.7549358010292053,
+      "clip_confidence": 0.7549358010292053,
+      "color_confidence": 0.011326379594487328,
+      "crop_image_file": "cropped_frames/crop_frame_430_dress_30.jpg",
+      "matched_product_colors": [
+        "Olive Green",
+        "Silver",
+        "Sage Green"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Powder Blue",
+        "Ash Gray",
+        "Silver"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8576222658157349,
+      "clip_confidence": 0.8576222658157349,
+      "color_confidence": 0.001923952448519689,
+      "crop_image_file": "cropped_frames/crop_frame_430_skirt_31.jpg",
+      "matched_product_colors": [
+        "Ash Gray",
+        "Slate Gray",
+        "Powder Blue"
+      ]
+    },
+    {
+      "type": "bag",
+      "colors": [
+        "Mocha",
+        "Black",
+        "Silver"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42113",
+      "confidence": 0.7732373476028442,
+      "clip_confidence": 0.7732373476028442,
+      "color_confidence": 0.026436049286526146,
+      "crop_image_file": "cropped_frames/crop_frame_460_bag_32.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Fuchsia",
+        "Teal"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Powder Blue",
+        "Slate Gray",
+        "Denim"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8388228416442871,
+      "clip_confidence": 0.8388228416442871,
+      "color_confidence": 0.00409063337973001,
+      "crop_image_file": "cropped_frames/crop_frame_480_skirt_33.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Taupe",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8361999988555908,
+      "clip_confidence": 0.8361999988555908,
+      "color_confidence": 0.016717316341111232,
+      "crop_image_file": "cropped_frames/crop_frame_480_dress_34.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Charcoal",
+        "Powder Blue"
+      ]
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Taupe",
+        "Charcoal",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16887",
+      "confidence": 0.769721269607544,
+      "clip_confidence": 0.769721269607544,
+      "color_confidence": 0.02523906793279462,
+      "crop_image_file": "cropped_frames/crop_frame_490_shoe_35.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Slate Gray",
+        "Umber"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Powder Blue",
+        "Slate Gray",
+        "Silver"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8805259466171265,
+      "clip_confidence": 0.8805259466171265,
+      "color_confidence": 0.0016699787646546223,
+      "crop_image_file": "cropped_frames/crop_frame_500_skirt_36.jpg",
+      "matched_product_colors": [
+        "Berry",
+        "Charcoal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Umber",
+        "Platinum",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.7877471446990967,
+      "clip_confidence": 0.7877471446990967,
+      "color_confidence": 0.011624268387821612,
+      "crop_image_file": "cropped_frames/crop_frame_500_shirt_37.jpg",
+      "matched_product_colors": [
+        "Taupe",
+        "Charcoal",
+        "Black"
+      ]
+    },
+    {
+      "type": "shoe",
+      "colors": [
+        "Taupe",
+        "Charcoal",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "42079",
+      "confidence": 0.8321319222450256,
+      "clip_confidence": 0.8321319222450256,
+      "color_confidence": 0.010664137413776045,
+      "crop_image_file": "cropped_frames/crop_frame_500_shoe_38.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Denim",
+        "Teal"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Powder Blue",
+        "Platinum",
+        "Ash Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8836871385574341,
+      "clip_confidence": 0.8836871385574341,
+      "color_confidence": 0.0018336485439516038,
+      "crop_image_file": "cropped_frames/crop_frame_510_skirt_39.jpg",
+      "matched_product_colors": [
+        "Ash Gray",
+        "Slate Gray",
+        "Powder Blue"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Silver",
+        "Platinum",
+        "Powder Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15220",
+      "confidence": 0.8521960377693176,
+      "clip_confidence": 0.8521960377693176,
+      "color_confidence": 0.0021046747663474286,
+      "crop_image_file": "cropped_frames/crop_frame_520_skirt_41.jpg",
+      "matched_product_colors": [
+        "Black",
+        "Denim",
+        "Teal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Silver",
+        "Black",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15777",
+      "confidence": 0.8216319680213928,
+      "clip_confidence": 0.8216319680213928,
+      "color_confidence": 0.0063188342024007435,
+      "crop_image_file": "cropped_frames/crop_frame_540_shirt_42.jpg",
+      "matched_product_colors": [
+        "Olive Green",
+        "Silver",
+        "Sage Green"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Slate Gray",
+        "Teal",
+        "Pastel Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8333210349082947,
+      "clip_confidence": 0.8333210349082947,
+      "color_confidence": 0.015881683018767516,
+      "crop_image_file": "cropped_frames/crop_frame_540_skirt_43.jpg",
+      "matched_product_colors": [
+        "Slate Gray",
+        "Powder Blue",
+        "Ash Gray"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Silver",
+        "Black",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15777",
+      "confidence": 0.8293918967247009,
+      "clip_confidence": 0.8293918967247009,
+      "color_confidence": 0.0062281164062361295,
+      "crop_image_file": "cropped_frames/crop_frame_550_shirt_44.jpg",
+      "matched_product_colors": [
+        "Pastel Green",
+        "Clay",
+        "Khaki"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Slate Gray",
+        "Charcoal",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8705794811248779,
+      "clip_confidence": 0.8705794811248779,
+      "color_confidence": 0.01625707801399302,
+      "crop_image_file": "cropped_frames/crop_frame_550_skirt_45.jpg",
+      "matched_product_colors": [
+        "Pastel Green",
+        "Emerald",
+        "Ash Gray"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Slate Gray",
+        "Teal",
+        "Powder Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8606646060943604,
+      "clip_confidence": 0.8606646060943604,
+      "color_confidence": 0.026747745696246838,
+      "crop_image_file": "cropped_frames/crop_frame_560_skirt_46.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Fuchsia",
+        "Teal"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Silver",
+        "Black",
+        "Umber"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15954",
+      "confidence": 0.8079463839530945,
+      "clip_confidence": 0.8079463839530945,
+      "color_confidence": 0.004667733855758685,
+      "crop_image_file": "cropped_frames/crop_frame_560_shirt_47.jpg",
+      "matched_product_colors": [
+        "Baby Blue",
+        "Powder Blue",
+        "Cyan"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Silver",
+        "Black",
+        "Teal"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15954",
+      "confidence": 0.8060792684555054,
+      "clip_confidence": 0.8060792684555054,
+      "color_confidence": 0.004646207150049923,
+      "crop_image_file": "cropped_frames/crop_frame_570_shirt_48.jpg",
+      "matched_product_colors": [
+        "Silver",
+        "Cyan",
+        "Dusty Rose"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Slate Gray",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15977",
+      "confidence": 0.7659483551979065,
+      "clip_confidence": 0.7659483551979065,
+      "color_confidence": 0.005302963916527834,
+      "crop_image_file": "cropped_frames/crop_frame_570_skirt_49.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Black",
+        "Lavender"
+      ]
+    },
+    {
+      "type": "shirt",
+      "colors": [
+        "Silver",
+        "Black",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "15777",
+      "confidence": 0.8074746131896973,
+      "clip_confidence": 0.8074746131896973,
+      "color_confidence": 0.008521717974321432,
+      "crop_image_file": "cropped_frames/crop_frame_580_shirt_50.jpg",
+      "matched_product_colors": [
+        "Denim",
+        "Powder Blue",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "skirt",
+      "colors": [
+        "Ash Gray",
+        "Umber",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8498471975326538,
+      "clip_confidence": 0.8498471975326538,
+      "color_confidence": 0.06310393361653391,
+      "crop_image_file": "cropped_frames/crop_frame_580_skirt_51.jpg",
+      "matched_product_colors": [
+        "Olive Green",
+        "Silver",
+        "Sage Green"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Teal",
+        "Cyan",
+        "Emerald"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "17155",
+      "confidence": 0.8589361906051636,
+      "clip_confidence": 0.8589361906051636,
+      "color_confidence": 0.012493482357219707,
+      "crop_image_file": "cropped_frames/crop_frame_60_dress_52.jpg",
+      "matched_product_colors": [
+        "Powder Blue",
+        "Fuchsia",
+        "Teal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Powder Blue",
+        "Teal",
+        "Powder Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16053",
+      "confidence": 0.8458505868911743,
+      "clip_confidence": 0.8458505868911743,
+      "color_confidence": 0.003391223822733284,
+      "crop_image_file": "cropped_frames/crop_frame_60_dress_53.jpg",
+      "matched_product_colors": [
+        "Ash Gray",
+        "Slate Gray",
+        "Powder Blue"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Pastel Blue",
+        "Teal",
+        "Slate Gray"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16541",
+      "confidence": 0.8737666010856628,
+      "clip_confidence": 0.8737666010856628,
+      "color_confidence": 0.003164188589499249,
+      "crop_image_file": "cropped_frames/crop_frame_80_dress_54.jpg",
+      "matched_product_colors": [
+        "Emerald",
+        "Silver",
+        "Charcoal"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Teal",
+        "Seafoam",
+        "Cyan"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16631",
+      "confidence": 0.8514046669006348,
+      "clip_confidence": 0.8514046669006348,
+      "color_confidence": 0.007873599699626805,
+      "crop_image_file": "cropped_frames/crop_frame_90_dress_55.jpg",
+      "matched_product_colors": [
+        "Berry",
+        "Charcoal",
+        "Taupe"
+      ]
+    },
+    {
+      "type": "dress",
+      "colors": [
+        "Pastel Blue",
+        "Teal",
+        "Pastel Blue"
+      ],
+      "match_type": "similar",
+      "matched_product_id": "16541",
+      "confidence": 0.8291106224060059,
+      "clip_confidence": 0.8291106224060059,
+      "color_confidence": 0.001994687869563614,
+      "crop_image_file": "cropped_frames/crop_frame_90_dress_56.jpg",
+      "matched_product_colors": [
+        "Olive Green",
+        "Copper",
+        "Olive Green"
+      ]
+    }
+  ]
+}
